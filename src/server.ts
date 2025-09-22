@@ -11,9 +11,9 @@ const server = http.createServer(app);
 const io = new SocketIOServer(server);
 
 io.on("connection", (socket) => {
-  console.log("A user connected:", socket.handshake.query.userId);
+  console.log("A user connected:", socket.id);
   socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.handshake.query.userId);
+    console.log("User disconnected:", socket.id);
   });
 });
 

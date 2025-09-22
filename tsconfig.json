@@ -32,6 +32,9 @@
     // "noFallthroughCasesInSwitch": true,
     // "noPropertyAccessFromIndexSignature": true,
 
+    // Module Resolution Options
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+
     // Recommended Options
     "strict": true,
     "jsx": "react-jsx",
