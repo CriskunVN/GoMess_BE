@@ -1,11 +1,14 @@
 import mongoose, { Schema, Document } from "mongoose";
 import bcrypt from "bcrypt";
 const UserSchema = new Schema({
-    name: { type: String, required: true },
+    userName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true, select: false },
+    phoneNumber: { type: String },
     avatarUrl: { type: String },
     onlineAt: { type: Date },
+    role: { type: String, enum: ["user", "admin"], default: "user" },
+    isActive: { type: Boolean, default: true },
 }, {
     timestamps: true,
 });
@@ -21,8 +24,8 @@ UserSchema.pre("save", async function (next) {
 UserSchema.methods.comparePassword = async function (candidatePassword) {
     return bcrypt.compare(candidatePassword, this.password);
 };
-// tạo index để tìm kiếm nhanh hơn
-UserSchema.index({ email: 1 });
+// tạo index để tìm kiếm nhanh hơn (removed duplicate index on email, as unique: true already creates it)
+UserSchema.index({ userName: 1 }); // Example: index on userName if needed
 const User = mongoose.model("User", UserSchema);
 export default User;
 //# sourceMappingURL=user.model.js.map

@@ -1,4 +1,4 @@
-export declare const RegisterService: (name: string, email: string, password: string) => Promise<import("mongoose").Document<unknown, {}, import("../models/user.model.js").IUser, {}, {}> & import("../models/user.model.js").IUser & Required<{
+export declare const RegisterService: (userName: string, email: string, password: string) => Promise<import("mongoose").Document<unknown, {}, import("../models/user.model.js").IUser, {}, {}> & import("../models/user.model.js").IUser & Required<{
     _id: unknown;
 }> & {
     __v: number;

@@ -3,21 +3,27 @@ import bcrypt from "bcrypt";
 
 // type user
 export interface IUser extends Document {
-  name: string;
+  userName: string;
   email: string;
+  phoneNumber?: string;
   password: string;
   avatarUrl?: string;
   onlineAt?: Date;
+  isActive: boolean;
+  role: string;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 const UserSchema: Schema<IUser> = new Schema(
   {
-    name: { type: String, required: true },
+    userName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true, select: false },
+    phoneNumber: { type: String },
     avatarUrl: { type: String },
     onlineAt: { type: Date },
+    role: { type: String, enum: ["user", "admin"], default: "user" },
+    isActive: { type: Boolean, default: true },
   },
   {
     timestamps: true,
@@ -39,8 +45,8 @@ UserSchema.methods.comparePassword = async function (
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// tạo index để tìm kiếm nhanh hơn
-UserSchema.index({ email: 1 });
+// tạo index để tìm kiếm nhanh hơn (removed duplicate index on email, as unique: true already creates it)
+UserSchema.index({ userName: 1 }); // Example: index on userName if needed
 
 const User = mongoose.model<IUser>("User", UserSchema);
 export default User;

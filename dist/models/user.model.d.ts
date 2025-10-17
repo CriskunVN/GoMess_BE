@@ -1,10 +1,13 @@
 import mongoose, { Document } from "mongoose";
 export interface IUser extends Document {
-    name: string;
+    userName: string;
     email: string;
+    phoneNumber?: string;
     password: string;
     avatarUrl?: string;
     onlineAt?: Date;
+    isActive: boolean;
+    role: string;
     comparePassword(candidatePassword: string): Promise<boolean>;
 }
 declare const User: mongoose.Model<IUser, {}, {}, {}, mongoose.Document<unknown, {}, IUser, {}, {}> & IUser & Required<{
