@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 // Hàm tạo JWT
 const createTokens = (userId) => {
     const accessSecret = process.env.JWT_SECRET_KEY;
@@ -8,12 +9,10 @@ const createTokens = (userId) => {
     }
     // Tạo access token
     const accessToken = jwt.sign({ id: userId }, accessSecret, {
-        expiresIn: process.env.JWT_EXPIRES_IN ?? "1h",
+        expiresIn: process.env.JWT_EXPIRES_IN ?? "30m",
     });
     // Tạo refresh token
-    const refreshToken = jwt.sign({ id: userId }, refreshSecret, {
-        expiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? "30d",
-    });
+    const refreshToken = crypto.randomBytes(64).toString("hex");
     return { accessToken, refreshToken };
 };
 const createToken = (userId) => {

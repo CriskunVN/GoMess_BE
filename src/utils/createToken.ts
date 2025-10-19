@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 // Hàm tạo JWT
 const createTokens = (userId: string) => {
@@ -13,18 +14,12 @@ const createTokens = (userId: string) => {
     { id: userId },
     accessSecret as any,
     {
-      expiresIn: process.env.JWT_EXPIRES_IN ?? "1h",
+      expiresIn: process.env.JWT_EXPIRES_IN ?? "30m",
     } as any
   );
 
   // Tạo refresh token
-  const refreshToken = jwt.sign(
-    { id: userId },
-    refreshSecret as any,
-    {
-      expiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? "30d",
-    } as any
-  );
+  const refreshToken = crypto.randomBytes(64).toString("hex");
 
   return { accessToken, refreshToken };
 };

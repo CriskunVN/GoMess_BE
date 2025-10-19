@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import { Server as SocketIOServer } from "socket.io";
 import dotenv from "dotenv";
 import AppError from "./utils/AppError.js";
+import { connectDB } from "./libs/db.js";
 dotenv.config();
 const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
@@ -15,16 +16,15 @@ io.on("connection", (socket) => {
     });
 });
 // Connect to MongoDB
-if (!process.env.DATABASE) {
-    console.log(process.env.DATABASE);
-    throw new AppError("DATABASE environment variable is not defined", 500);
-}
-// Replace <PASSWORD> with your actual database password
-const DB = process.env.DATABASE.replace("<PASSWORD>", process.env.DATABASE_PASSWORD || "");
-// Connect to the database using mongoose
-mongoose.connect(DB).then(() => console.log("DB connection successful!"));
-// Start the server
-server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+connectDB()
+    .then(() => {
+    // Start the server
+    server.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+})
+    .catch((error) => {
+    console.error("MongoDB connection error:", error);
+    process.exit(1);
 });
 //# sourceMappingURL=server.js.map

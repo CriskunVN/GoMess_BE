@@ -5,52 +5,64 @@ import catchAsync from "../utils/catchAsync.js";
 import { createTokens } from "../utils/createToken.js";
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
+import Session from "../models/session.model.js";
+import { REFRESH_TOKEN_EXPIRES_DAYS } from "../types/typeToken.js";
 
 // Đăng ký người dùng mới
 export const Register = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { userName, email, password } = req.body;
+    const { userName, email, password, displayName } = req.body;
     if (!userName || !email || !password) {
       return next(new AppError("Please provide all required fields", 400));
     }
 
-    try {
-      const newUser = await RegisterService(userName, email, password);
-      if (!newUser) {
-        res
-          .status(400)
-          .json({ status: "fail", message: "User registration failed" });
-        return;
-      }
-      res.status(201).json({
-        status: "success",
-        message: "User registered successfully",
-        data: { user: newUser },
-      });
-    } catch (error) {
-      next(new AppError("Failed to register user", 500));
+    const newUser = await RegisterService(
+      userName,
+      email,
+      password,
+      displayName
+    );
+    if (!newUser) {
+      res
+        .status(400)
+        .json({ status: "fail", message: "User registration failed" });
+      return;
     }
+    res.status(201).json({
+      status: "success",
+      message: "User registered successfully",
+    });
   }
 );
 
 // Đăng nhập người dùng
 export const Login = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { email, password } = req.body;
+    // lấy input từ body
+    const { userName, password } = req.body;
 
-    const user = await LoginService(email, password);
+    // xử lý logic đăng nhập
+    const user = await LoginService(userName, password);
     if (!user) {
-      return next(new AppError("Invalid email or password", 401));
+      return next(new AppError("Invalid username or password", 401));
     }
 
+    // Tạo access token và refresh token
     const { accessToken, refreshToken } = createTokens(user._id as string);
+
+    // lưu refresh token vào database
+    await Session.create({
+      userId: user._id,
+      refreshToken,
+      expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_DAYS),
+    });
 
     // Cập nhật refresh token trong cookie
     res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      httpOnly: true, // chống XSS
+      secure: true,
+      sameSite: "strict", // Chỉ gửi cookie trong cùng một trang web
+      maxAge: REFRESH_TOKEN_EXPIRES_DAYS, // 30 days
     });
 
     res.status(200).json({ status: "success", accessToken, data: { user } });

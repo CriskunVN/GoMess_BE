@@ -7,7 +7,10 @@ export interface IUser extends Document {
   email: string;
   phoneNumber?: string;
   password: string;
+  displayName: string;
   avatarUrl?: string;
+  avatarID?: string;
+  bio?: string;
   onlineAt?: Date;
   isActive: boolean;
   role: string;
@@ -16,17 +19,35 @@ export interface IUser extends Document {
 
 const UserSchema: Schema<IUser> = new Schema(
   {
-    userName: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    userName: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+    },
     password: { type: String, required: true, select: false },
-    phoneNumber: { type: String },
-    avatarUrl: { type: String },
+    phoneNumber: {
+      type: String,
+      sparse: true, // cho phép null nhưng không được trùng lặp nếu có giá trị
+    },
     onlineAt: { type: Date },
+    bio: { type: String, maxlength: 500 },
+    displayName: { type: String, required: true, trim: true },
+    avatarUrl: { type: String }, // lưu đường dẫn ảnh
+    avatarID: { type: String }, // lưu ID ảnh trên dịch vụ lưu trữ (xóa , cập nhật dễ dàng)
     role: { type: String, enum: ["user", "admin"], default: "user" },
     isActive: { type: Boolean, default: true },
   },
   {
-    timestamps: true,
+    timestamps: true, // tự động thêm createdAt và updatedAt
   }
 );
 
@@ -44,9 +65,6 @@ UserSchema.methods.comparePassword = async function (
 ): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
 };
-
-// tạo index để tìm kiếm nhanh hơn (removed duplicate index on email, as unique: true already creates it)
-UserSchema.index({ userName: 1 }); // Example: index on userName if needed
 
 const User = mongoose.model<IUser>("User", UserSchema);
 export default User;
