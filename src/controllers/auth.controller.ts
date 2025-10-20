@@ -69,6 +69,26 @@ export const Login = catchAsync(
   }
 );
 
+export const Logout = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    // Lấy refresh token từ cookie
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) {
+      return next(new AppError("Refresh token not provided", 401));
+    }
+
+    // Xoá refresh token khỏi database
+    await Session.findOneAndDelete({ refreshToken });
+
+    // Xoá cookie trên trình duyệt
+    res.clearCookie("refreshToken");
+
+    res
+      .status(204)
+      .json({ status: "success", message: "Logged out successfully" });
+  }
+);
+
 // Refresh access token
 export const refreshToken = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -98,16 +118,5 @@ export const refreshToken = catchAsync(
     // Tạo access token mới
     const { accessToken } = createTokens(user._id as string);
     res.status(200).json({ status: "success", accessToken });
-  }
-);
-
-// lấy user hiện tại
-export const getCurrentUser = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user) {
-      return next(new AppError("User not found", 404));
-    }
-    req.user.password = undefined as any;
-    res.status(200).json({ status: "success", data: { user: req.user } });
   }
 );

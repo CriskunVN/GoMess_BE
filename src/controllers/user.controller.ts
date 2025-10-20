@@ -2,6 +2,19 @@ import type { Request, Response, NextFunction, Application } from "express";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/AppError.js";
 import * as userService from "../services/user.service.js";
+import type { IUser } from "../models/user.model.js";
+
+// lấy user hiện tại
+export const getCurrentUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return next(new AppError("User not found", 404));
+    }
+    const user: IUser = req.user;
+    user.password = undefined as any;
+    res.status(200).json({ status: "success", data: { user } });
+  }
+);
 
 // Lấy thông tin người dùng theo ID
 export const getUserById = catchAsync(

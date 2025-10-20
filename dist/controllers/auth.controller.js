@@ -50,6 +50,20 @@ export const Login = catchAsync(async (req, res, next) => {
     });
     res.status(200).json({ status: "success", accessToken, data: { user } });
 });
+export const Logout = catchAsync(async (req, res, next) => {
+    // Lấy refresh token từ cookie
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) {
+        return next(new AppError("Refresh token not provided", 401));
+    }
+    // Xoá refresh token khỏi database
+    await Session.findOneAndDelete({ refreshToken });
+    // Xoá cookie trên trình duyệt
+    res.clearCookie("refreshToken");
+    res
+        .status(204)
+        .json({ status: "success", message: "Logged out successfully" });
+});
 // Refresh access token
 export const refreshToken = catchAsync(async (req, res, next) => {
     const refreshToken = req.cookies?.refreshToken;
@@ -75,13 +89,5 @@ export const refreshToken = catchAsync(async (req, res, next) => {
     // Tạo access token mới
     const { accessToken } = createTokens(user._id);
     res.status(200).json({ status: "success", accessToken });
-});
-// lấy user hiện tại
-export const getCurrentUser = catchAsync(async (req, res, next) => {
-    if (!req.user) {
-        return next(new AppError("User not found", 404));
-    }
-    req.user.password = undefined;
-    res.status(200).json({ status: "success", data: { user: req.user } });
 });
 //# sourceMappingURL=auth.controller.js.map

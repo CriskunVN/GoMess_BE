@@ -9,22 +9,19 @@ export const protect = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // 1) get token từ header hoặc cookie
     let token: string | undefined;
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer")
-    ) {
-      token = req.headers.authorization.split(" ")[1];
-    } else if (req.cookies?.token) {
-      token = req.cookies.token;
-    }
+    const authHeader: string | undefined = req.headers.authorization;
 
+    if (authHeader && authHeader.startsWith("Bearer")) {
+      token = authHeader.split(" ")[1];
+    }
+    console.log(token);
     if (!token) {
       return next(
         new AppError("You are not logged in. Please log in to get access.", 401)
       );
     }
 
-    // 2) Verify token
+    // 2) Xác nhận token hợp lệ
     const secretKey = process.env.JWT_SECRET_KEY;
     if (!secretKey) {
       return next(new AppError("JWT secret key is not defined.", 500));
@@ -37,7 +34,7 @@ export const protect = catchAsync(
       return next(new AppError("Invalid token. Please log in again.", 401));
     }
 
-    // 3) kiểm tra người dùng còn tồn tại không
+    // 3) Tìm user từ token
     const currentUser = await User.findById(decoded.id);
     if (!currentUser) {
       return next(

@@ -6,9 +6,9 @@ const router = express.Router();
 router.post("/register", authController.Register);
 // Đăng nhập người dùng
 router.post("/login", authController.Login);
+// Đăng xuất người dùng
+router.post("/logout", protect, authController.Logout);
 // Refresh token
 router.post("/refresh", protect, authController.refreshToken);
-// Lấy thông tin người dùng hiện tại
-router.get("/me", protect, authController.getCurrentUser);
 export default router;
 //# sourceMappingURL=auth.route.js.map

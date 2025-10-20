@@ -1,6 +1,15 @@
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/AppError.js";
 import * as userService from "../services/user.service.js";
+// lấy user hiện tại
+export const getCurrentUser = catchAsync(async (req, res, next) => {
+    if (!req.user) {
+        return next(new AppError("User not found", 404));
+    }
+    const user = req.user;
+    user.password = undefined;
+    res.status(200).json({ status: "success", data: { user } });
+});
 // Lấy thông tin người dùng theo ID
 export const getUserById = catchAsync(async (req, res, next) => {
     const user = await userService.getUserById(req.params.id);
