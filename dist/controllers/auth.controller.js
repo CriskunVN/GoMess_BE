@@ -8,11 +8,11 @@ import Session from "../models/session.model.js";
 import { REFRESH_TOKEN_EXPIRES_DAYS } from "../types/typeToken.js";
 // Đăng ký người dùng mới
 export const Register = catchAsync(async (req, res, next) => {
-    const { userName, email, password, displayName } = req.body;
-    if (!userName || !email || !password) {
+    const { username, email, password, displayName } = req.body;
+    if (!username || !email || !password) {
         return next(new AppError("Please provide all required fields", 400));
     }
-    const newUser = await RegisterService(userName, email, password, displayName);
+    const newUser = await RegisterService(username, email, password, displayName);
     if (!newUser) {
         res
             .status(400)
@@ -27,9 +27,9 @@ export const Register = catchAsync(async (req, res, next) => {
 // Đăng nhập người dùng
 export const Login = catchAsync(async (req, res, next) => {
     // lấy input từ body
-    const { userName, password } = req.body;
+    const { username, password } = req.body;
     // xử lý logic đăng nhập
-    const user = await LoginService(userName, password);
+    const user = await LoginService(username, password);
     if (!user) {
         return next(new AppError("Invalid username or password", 401));
     }

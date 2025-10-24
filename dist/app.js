@@ -7,8 +7,9 @@ import UserRoute from "./routes/user.route.js";
 import AppError from "./utils/AppError.js";
 import globalErrorHandler from "./middlewares/globalErrorHandler.js";
 const app = express();
+const CLIENT_URL = process.env.CLIENT_URL;
 //1. Middleware
-app.use(cors());
+app.use(cors({ origin: CLIENT_URL, credentials: true })); // CORS cho phép truy cập từ client
 app.use(morgan("dev")); // Ghi log các request
 app.use(cookieParser());
 app.use(express.json());

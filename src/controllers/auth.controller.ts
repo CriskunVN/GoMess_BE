@@ -11,13 +11,13 @@ import { REFRESH_TOKEN_EXPIRES_DAYS } from "../types/typeToken.js";
 // Đăng ký người dùng mới
 export const Register = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { userName, email, password, displayName } = req.body;
-    if (!userName || !email || !password) {
+    const { username, email, password, displayName } = req.body;
+    if (!username || !email || !password) {
       return next(new AppError("Please provide all required fields", 400));
     }
 
     const newUser = await RegisterService(
-      userName,
+      username,
       email,
       password,
       displayName
@@ -39,10 +39,10 @@ export const Register = catchAsync(
 export const Login = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // lấy input từ body
-    const { userName, password } = req.body;
+    const { username, password } = req.body;
 
     // xử lý logic đăng nhập
-    const user = await LoginService(userName, password);
+    const user = await LoginService(username, password);
     if (!user) {
       return next(new AppError("Invalid username or password", 401));
     }

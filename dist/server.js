@@ -1,11 +1,10 @@
+import "dotenv/config"; // Load environment variables BEFORE other imports
 import app from "./app.js";
 import http from "http";
 import mongoose from "mongoose";
 import { Server as SocketIOServer } from "socket.io";
-import dotenv from "dotenv";
 import AppError from "./utils/AppError.js";
 import { connectDB } from "./libs/db.js";
-dotenv.config();
 const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 const io = new SocketIOServer(server);

@@ -9,8 +9,9 @@ import AppError from "./utils/AppError.js";
 import globalErrorHandler from "./middlewares/globalErrorHandler.js";
 const app: Application = express();
 
+const CLIENT_URL: string = process.env.CLIENT_URL as string;
 //1. Middleware
-app.use(cors());
+app.use(cors({ origin: CLIENT_URL, credentials: true })); // CORS cho phép truy cập từ client
 app.use(morgan("dev")); // Ghi log các request
 app.use(cookieParser());
 app.use(express.json());
