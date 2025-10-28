@@ -31,7 +31,7 @@ export const Login = catchAsync(async (req, res, next) => {
     // xử lý logic đăng nhập
     const user = await LoginService(username, password);
     if (!user) {
-        return next(new AppError("Invalid username or password", 401));
+        return next(new AppError("Invalid username or password", 400));
     }
     // Tạo access token và refresh token
     const { accessToken, refreshToken } = createTokens(user._id);
@@ -66,28 +66,27 @@ export const Logout = catchAsync(async (req, res, next) => {
 });
 // Refresh access token
 export const refreshToken = catchAsync(async (req, res, next) => {
+    // Lấy refresh token từ cookie
     const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) {
-        return next(new AppError("Refresh token not provided", 401));
+        return next(new AppError("Refresh token not provided", 403));
     }
-    const refreshSecret = process.env.JWT_REFRESH_SECRET;
-    if (!refreshSecret) {
-        return next(new AppError("Refresh secret not defined", 500));
+    // Kiểm tra refresh token trong database
+    const session = await Session.findOne({ refreshToken });
+    if (!session) {
+        return next(new AppError("Invalid refresh token or expired", 403));
     }
-    let decoded;
-    try {
-        decoded = jwt.verify(refreshToken, refreshSecret);
+    // kiểm tra hết hạn chưa
+    const expiresAt = session.expiresAt;
+    if (!expiresAt || expiresAt < new Date()) {
+        return next(new AppError("Refresh token expired", 403));
     }
-    catch (err) {
-        return next(new AppError("Invalid refresh token", 401));
+    // Tạo access token mới - lấy userId từ session
+    const userId = session.userId;
+    if (!userId) {
+        return next(new AppError("Associated user not found for session", 403));
     }
-    // kiểm tra người dùng còn tồn tại không
-    const user = await User.findById(decoded.id);
-    if (!user) {
-        return next(new AppError("User no longer exists", 401));
-    }
-    // Tạo access token mới
-    const { accessToken } = createTokens(user._id);
+    const { accessToken } = createTokens(String(userId));
     res.status(200).json({ status: "success", accessToken });
 });
 //# sourceMappingURL=auth.controller.js.map

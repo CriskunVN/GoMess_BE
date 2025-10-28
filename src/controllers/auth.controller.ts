@@ -44,7 +44,7 @@ export const Login = catchAsync(
     // xử lý logic đăng nhập
     const user = await LoginService(username, password);
     if (!user) {
-      return next(new AppError("Invalid username or password", 401));
+      return next(new AppError("Invalid username or password", 400));
     }
 
     // Tạo access token và refresh token
@@ -92,31 +92,31 @@ export const Logout = catchAsync(
 // Refresh access token
 export const refreshToken = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    // Lấy refresh token từ cookie
     const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) {
-      return next(new AppError("Refresh token not provided", 401));
+      return next(new AppError("Refresh token not provided", 403));
     }
 
-    const refreshSecret = process.env.JWT_REFRESH_SECRET;
-    if (!refreshSecret) {
-      return next(new AppError("Refresh secret not defined", 500));
+    // Kiểm tra refresh token trong database
+    const session = await Session.findOne({ refreshToken });
+    if (!session) {
+      return next(new AppError("Invalid refresh token or expired", 403));
     }
 
-    let decoded: any;
-    try {
-      decoded = jwt.verify(refreshToken, refreshSecret);
-    } catch (err) {
-      return next(new AppError("Invalid refresh token", 401));
+    // kiểm tra hết hạn chưa
+    const expiresAt = (session as any).expiresAt as Date | undefined;
+    if (!expiresAt || expiresAt < new Date()) {
+      return next(new AppError("Refresh token expired", 403));
     }
 
-    // kiểm tra người dùng còn tồn tại không
-    const user = await User.findById(decoded.id);
-    if (!user) {
-      return next(new AppError("User no longer exists", 401));
+    // Tạo access token mới - lấy userId từ session
+    const userId = (session as any).userId;
+    if (!userId) {
+      return next(new AppError("Associated user not found for session", 403));
     }
 
-    // Tạo access token mới
-    const { accessToken } = createTokens(user._id as string);
+    const { accessToken } = createTokens(String(userId));
     res.status(200).json({ status: "success", accessToken });
   }
 );
