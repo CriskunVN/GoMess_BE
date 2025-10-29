@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import { Server as SocketIOServer } from "socket.io";
 import AppError from "./utils/AppError.js";
 import { connectDB } from "./libs/db.js";
+import { protect } from "./middlewares/protectAuth.middleware.js";
 const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 const io = new SocketIOServer(server);

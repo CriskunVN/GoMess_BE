@@ -7,6 +7,7 @@ import AuthRoute from "./routes/auth.route.js";
 import UserRoute from "./routes/user.route.js";
 import AppError from "./utils/AppError.js";
 import globalErrorHandler from "./middlewares/globalErrorHandler.js";
+import { protect } from "./middlewares/protectAuth.middleware.js";
 const app: Application = express();
 
 const CLIENT_URL: string = process.env.CLIENT_URL as string;
@@ -20,6 +21,7 @@ app.use(express.json());
 const apiPrefix = process.env.API_PREFIX || "/api/v1";
 
 app.use(`${apiPrefix}/auth`, AuthRoute);
+app.use(protect);
 app.use(`${apiPrefix}/users`, UserRoute);
 
 // Error handling

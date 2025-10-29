@@ -5,11 +5,8 @@ import catchAsync from "../utils/catchAsync.js";
 // Middle để bảo vệ các route yêu cầu xác thực (authentication)
 export const protect = catchAsync(async (req, res, next) => {
     // 1) get token từ header hoặc cookie
-    let token;
     const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith("Bearer")) {
-        token = authHeader.split(" ")[1];
-    }
+    const token = authHeader && authHeader.split(" ")[1]; // Bearer <token>
     if (!token) {
         return next(new AppError("You are not logged in. Please log in to get access.", 401));
     }

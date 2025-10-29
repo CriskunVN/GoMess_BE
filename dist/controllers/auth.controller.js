@@ -89,4 +89,9 @@ export const refreshToken = catchAsync(async (req, res, next) => {
     const { accessToken } = createTokens(String(userId));
     res.status(200).json({ status: "success", accessToken });
 });
+export const test = catchAsync(async (req, res, next) => {
+    res
+        .status(200)
+        .json({ status: "success", message: "Test endpoint working" });
+});
 //# sourceMappingURL=auth.controller.js.map

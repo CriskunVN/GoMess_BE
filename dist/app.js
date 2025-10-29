@@ -6,6 +6,7 @@ import AuthRoute from "./routes/auth.route.js";
 import UserRoute from "./routes/user.route.js";
 import AppError from "./utils/AppError.js";
 import globalErrorHandler from "./middlewares/globalErrorHandler.js";
+import { protect } from "./middlewares/protectAuth.middleware.js";
 const app = express();
 const CLIENT_URL = process.env.CLIENT_URL;
 //1. Middleware
@@ -16,6 +17,7 @@ app.use(express.json());
 //2. Routes
 const apiPrefix = process.env.API_PREFIX || "/api/v1";
 app.use(`${apiPrefix}/auth`, AuthRoute);
+app.use(protect);
 app.use(`${apiPrefix}/users`, UserRoute);
 // Error handling
 // 404 xử lý các route không tồn tại

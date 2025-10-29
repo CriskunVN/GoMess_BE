@@ -12,7 +12,8 @@ router.post("/login", authController.Login);
 // Đăng xuất người dùng
 router.post("/logout", protect, authController.Logout);
 
-// Refresh token
-router.post("/refresh", protect, authController.refreshToken);
+router.post("/refresh", authController.refreshToken);
+
+router.get("/test", authController.test);
 
 export default router;

@@ -14,7 +14,7 @@ const createTokens = (userId: string) => {
     { id: userId },
     accessSecret as any,
     {
-      expiresIn: process.env.JWT_EXPIRES_IN ?? "30m",
+      expiresIn: "30s", // process.env.JWT_EXPIRES_IN || "1m"
     } as any
   );
 

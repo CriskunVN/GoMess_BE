@@ -120,3 +120,11 @@ export const refreshToken = catchAsync(
     res.status(200).json({ status: "success", accessToken });
   }
 );
+
+export const test = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    res
+      .status(200)
+      .json({ status: "success", message: "Test endpoint working" });
+  }
+);

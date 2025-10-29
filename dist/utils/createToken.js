@@ -9,7 +9,7 @@ const createTokens = (userId) => {
     }
     // Tạo access token
     const accessToken = jwt.sign({ id: userId }, accessSecret, {
-        expiresIn: process.env.JWT_EXPIRES_IN ?? "30m",
+        expiresIn: "30s", // process.env.JWT_EXPIRES_IN || "1m"
     });
     // Tạo refresh token
     const refreshToken = crypto.randomBytes(64).toString("hex");

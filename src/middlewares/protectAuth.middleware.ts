@@ -8,12 +8,9 @@ import catchAsync from "../utils/catchAsync.js";
 export const protect = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // 1) get token từ header hoặc cookie
-    let token: string | undefined;
     const authHeader: string | undefined = req.headers.authorization;
+    const token = authHeader && authHeader.split(" ")[1]; // Bearer <token>
 
-    if (authHeader && authHeader.startsWith("Bearer")) {
-      token = authHeader.split(" ")[1];
-    }
     if (!token) {
       return next(
         new AppError("You are not logged in. Please log in to get access.", 401)

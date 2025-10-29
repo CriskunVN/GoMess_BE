@@ -3,8 +3,6 @@ import express from "express";
 import { protect, restrictTo } from "../middlewares/protectAuth.middleware.js";
 const router = express.Router();
 
-router.use(protect);
-
 // Lấy thông tin người dùng hiện tại
 router.get("/me", userController.getCurrentUser);
 
