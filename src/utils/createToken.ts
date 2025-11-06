@@ -4,8 +4,7 @@ import crypto from "crypto";
 // Hàm tạo JWT
 const createTokens = (userId: string) => {
   const accessSecret = process.env.JWT_SECRET_KEY;
-  const refreshSecret = process.env.JWT_REFRESH_SECRET;
-  if (!accessSecret || !refreshSecret) {
+  if (!accessSecret) {
     throw new Error("JWT secrets are not defined in environment variables.");
   }
 
@@ -14,7 +13,7 @@ const createTokens = (userId: string) => {
     { id: userId },
     accessSecret as any,
     {
-      expiresIn: "30s", // process.env.JWT_EXPIRES_IN || "1m"
+      expiresIn: "15m", // process.env.JWT_EXPIRES_IN || "1m"
     } as any
   );
 
