@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction, Application } from "express";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/AppError.js";
 import * as userService from "../services/user.service.js";
-import type { IUser } from "../models/user.model.js";
+import type { IUser } from "../types/type.js";
 
 // lấy user hiện tại
 export const getCurrentUser = catchAsync(

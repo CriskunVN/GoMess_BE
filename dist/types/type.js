@@ -1,0 +1,43 @@
+import mongoose, { Document, Types } from "mongoose";
+export const participantSchema = new mongoose.Schema({
+    userId: {
+        type: Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
+    joinedAt: {
+        type: Date,
+        default: Date.now,
+    },
+}, { _id: false });
+export const groupSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
+    },
+    createdBy: {
+        type: Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
+    // Ảnh đại diện nhóm
+    avatarUrl: {
+        type: String,
+    },
+}, {
+    _id: false,
+});
+export const lastMessageSchema = new mongoose.Schema({
+    _id: { type: String },
+    content: { type: String, default: null },
+    senderId: {
+        type: Types.ObjectId,
+        ref: "User",
+        default: null,
+        createdAt: {
+            type: Date,
+            default: null,
+        },
+    },
+}, { _id: false });
+//# sourceMappingURL=type.js.map

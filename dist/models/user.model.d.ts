@@ -1,18 +1,5 @@
-import mongoose, { Document } from "mongoose";
-export interface IUser extends Document {
-    username: string;
-    email: string;
-    phoneNumber?: string;
-    password: string;
-    displayName: string;
-    avatarUrl?: string;
-    avatarID?: string;
-    bio?: string;
-    onlineAt?: Date;
-    isActive: boolean;
-    role: string;
-    comparePassword(candidatePassword: string): Promise<boolean>;
-}
+import mongoose from "mongoose";
+import type { IUser } from "../types/type.js";
 declare const User: mongoose.Model<IUser, {}, {}, {}, mongoose.Document<unknown, {}, IUser, {}, {}> & IUser & Required<{
     _id: unknown;
 }> & {

@@ -1,13 +1,18 @@
 import express from "express";
+// Load environment variables
+import dotenv from "dotenv";
+dotenv.config();
+const app = express();
 import morgan from "morgan";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import AuthRoute from "./routes/auth.route.js";
-import UserRoute from "./routes/user.route.js";
 import AppError from "./utils/AppError.js";
 import globalErrorHandler from "./middlewares/globalErrorHandler.js";
 import { protect } from "./middlewares/protectAuth.middleware.js";
-const app = express();
+// import routes
+import AuthRoute from "./routes/auth.route.js";
+import UserRoute from "./routes/user.route.js";
+import FriendRoute from "./routes/friend.route.js";
 const CLIENT_URL = process.env.CLIENT_URL;
 //1. Middleware
 app.use(cors({ origin: CLIENT_URL, credentials: true })); // CORS cho phép truy cập từ client
@@ -15,10 +20,10 @@ app.use(morgan("dev")); // Ghi log các request
 app.use(cookieParser());
 app.use(express.json());
 //2. Routes
-const apiPrefix = process.env.API_PREFIX || "/api/v1";
-app.use(`${apiPrefix}/auth`, AuthRoute);
+app.use(`${process.env.API_PREFIX}/auth`, AuthRoute);
 app.use(protect);
-app.use(`${apiPrefix}/users`, UserRoute);
+app.use(`${process.env.API_PREFIX}/users`, UserRoute);
+app.use(`${process.env.API_PREFIX}/friends`, FriendRoute);
 // Error handling
 // 404 xử lý các route không tồn tại
 app.use((req, _res, next) => {

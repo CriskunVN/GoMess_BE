@@ -1,9 +1,5 @@
-import mongoose, { Document } from "mongoose";
-export interface ISession extends Document {
-    userId: mongoose.Schema.Types.ObjectId;
-    refreshToken: string;
-    createdAt: Date;
-}
+import mongoose from "mongoose";
+import type { ISession } from "../types/type.js";
 declare const Session: mongoose.Model<ISession, {}, {}, {}, mongoose.Document<unknown, {}, ISession, {}, {}> & ISession & Required<{
     _id: unknown;
 }> & {

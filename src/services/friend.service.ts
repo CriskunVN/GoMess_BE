@@ -14,6 +14,7 @@ export const sendFriendRequestService = async (
     throw new AppError("Không thể gửi lời mời kết bạn cho chính mình", 400);
   }
 
+  console.log(toUserId);
   // kiểm tra user nhận lời mời kết bạn có tồn tại không
   const userExists = await User.exists({ _id: toUserId });
   if (!userExists) {
@@ -46,4 +47,61 @@ export const sendFriendRequestService = async (
       400
     );
   }
+
+  const request = await FriendRequest.create({
+    from: fromUserId,
+    to: toUserId,
+    message,
+  });
+
+  return request;
+};
+
+export const acceptFriendRequestService = async (
+  requestId: string,
+  userId: string
+) => {
+  // Kiểm tra lời mời kết bạn có tồn tại không
+  const friendRequest = await FriendRequest.findById(requestId);
+  if (!friendRequest) {
+    throw new AppError("Lời mời kết bạn không tồn tại", 404);
+  }
+  // Kiểm tra người dùng có quyền chấp nhận lời mời kết bạn không
+  if (friendRequest.to.toString() !== userId) {
+    throw new AppError("Bạn không có quyền chấp nhận lời mời kết bạn này", 403);
+  }
+
+  // Tạo mối quan hệ bạn bè
+  const friend = await Friend.create({
+    userA: friendRequest.from,
+    userB: friendRequest.to,
+  });
+
+  // Xóa lời mời kết bạn
+  await FriendRequest.findByIdAndDelete(requestId);
+  const data = await User.findById(friendRequest.from)
+    .select("_id displayName avatarUrl")
+    .lean();
+
+  return data;
+};
+
+export const declineFriendRequestService = async (
+  requestId: string,
+  userId: string
+) => {
+  // Kiểm tra lời mời kết bạn có tồn tại không
+  const friendRequest = await FriendRequest.findById(requestId);
+  if (!friendRequest) {
+    throw new AppError("Lời mời kết bạn không tồn tại", 404);
+  }
+  // Kiểm tra người dùng có quyền từ chối lời mời kết bạn không
+  if (friendRequest.to.toString() !== userId) {
+    throw new AppError("Bạn không có quyền từ chối lời mời kết bạn này", 403);
+  }
+
+  // Xóa lời mời kết bạn
+  await FriendRequest.findByIdAndDelete(requestId);
+
+  return { message: "Đã từ chối lời mời kết bạn" };
 };
