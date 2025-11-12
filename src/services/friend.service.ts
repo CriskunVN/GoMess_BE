@@ -10,7 +10,7 @@ export const sendFriendRequestService = async (
   message?: string
 ) => {
   // kiểm tra user gửi lời mời kết bạn có trùng với user nhận lời mời kết bạn không
-  if (fromUserId === toUserId) {
+  if (fromUserId.toString() === toUserId) {
     throw new AppError("Không thể gửi lời mời kết bạn cho chính mình", 400);
   }
 
@@ -67,12 +67,13 @@ export const acceptFriendRequestService = async (
     throw new AppError("Lời mời kết bạn không tồn tại", 404);
   }
   // Kiểm tra người dùng có quyền chấp nhận lời mời kết bạn không
-  if (friendRequest.to.toString() !== userId) {
+  console.log(userId);
+  if (friendRequest.to.toString() !== userId.toString()) {
     throw new AppError("Bạn không có quyền chấp nhận lời mời kết bạn này", 403);
   }
 
   // Tạo mối quan hệ bạn bè
-  const friend = await Friend.create({
+  await Friend.create({
     userA: friendRequest.from,
     userB: friendRequest.to,
   });
@@ -96,7 +97,7 @@ export const declineFriendRequestService = async (
     throw new AppError("Lời mời kết bạn không tồn tại", 404);
   }
   // Kiểm tra người dùng có quyền từ chối lời mời kết bạn không
-  if (friendRequest.to.toString() !== userId) {
+  if (friendRequest.to.toString() !== userId.toString()) {
     throw new AppError("Bạn không có quyền từ chối lời mời kết bạn này", 403);
   }
 
@@ -104,4 +105,34 @@ export const declineFriendRequestService = async (
   await FriendRequest.findByIdAndDelete(requestId);
 
   return { message: "Đã từ chối lời mời kết bạn" };
+};
+
+export const getFriendRequestsService = async (userId: string) => {
+  const populateFields: string = "_id username displayName avatarUrl";
+  // lấy danh sách lời mời kết bạn đến cho userId
+  const [sent, received] = await Promise.all([
+    FriendRequest.find({ from: userId }).populate("to", populateFields).lean(),
+    FriendRequest.find({ to: userId }).populate("from", populateFields).lean(),
+  ]);
+
+  return { sent, received };
+};
+
+export const getAllFriendsService = async (userId: string) => {
+  // lấy danh sách bạn bè của userId
+  const friendShip = await Friend.find({
+    $or: [{ userA: userId }, { userB: userId }],
+  })
+    .populate("userA userB", "_id displayName avatarUrl")
+    .lean();
+
+  if (!friendShip) {
+    return [];
+  }
+
+  const friend = friendShip.map((f) =>
+    f.userA._id.toString() === userId ? f.userB : f.userA
+  );
+
+  return friend;
 };

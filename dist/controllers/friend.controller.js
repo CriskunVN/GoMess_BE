@@ -1,9 +1,11 @@
-import { sendFriendRequestService, acceptFriendRequestService, declineFriendRequestService, } from "../services/friend.service.js";
+import { sendFriendRequestService, acceptFriendRequestService, declineFriendRequestService, getFriendRequestsService, getAllFriendsService, } from "../services/friend.service.js";
 import AppError from "../utils/AppError.js";
 import catchAsync from "../utils/catchAsync.js";
 // Lấy danh sách bạn bè
 export const getAllFriends = catchAsync(async (req, res) => {
-    res.status(200).json({ message: "Lấy danh sách bạn bè" });
+    const userId = req.user._id; // user hiện tại đang xác thực
+    const friends = await getAllFriendsService(userId);
+    res.status(200).json({ message: "Lấy danh sách bạn bè", friends });
 });
 // Gửi lời mời kết bạn
 export const sendFriendRequest = catchAsync(async (req, res) => {
@@ -48,7 +50,13 @@ export const declineFriendRequest = catchAsync(async (req, res) => {
 });
 // Lấy danh sách lời mời kết bạn
 export const getFriendRequest = catchAsync(async (req, res) => {
-    res.status(200).json({ message: "Lấy danh sách lời mời kết bạn" });
+    const userId = req.user._id; // user hiện tại đang xác thực
+    const { sent, received } = await getFriendRequestsService(userId);
+    res.status(200).json({
+        message: "Lấy danh sách lời mời kết bạn",
+        sent,
+        received,
+    });
 });
 // Xóa bạn bè
 export const removeFriend = catchAsync(async (req, res) => {

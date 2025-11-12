@@ -9,10 +9,10 @@ export const RegisterService = async (
   displayName: string
 ) => {
   // kiểm tra xem email đã tồn tại chưa
-  const existingUser = await User.findOne({ email });
+  const existingUser = await User.findOne({ $or: [{ email }, { username }] });
 
   if (existingUser) {
-    throw new AppError("Email already in use", 400);
+    throw new AppError("Email or username already in use", 400);
   }
 
   const newUser = new User({ username, email, password, displayName });

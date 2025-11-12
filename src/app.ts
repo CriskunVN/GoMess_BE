@@ -18,6 +18,7 @@ import { protect } from "./middlewares/protectAuth.middleware.js";
 import AuthRoute from "./routes/auth.route.js";
 import UserRoute from "./routes/user.route.js";
 import FriendRoute from "./routes/friend.route.js";
+import MessageRoute from "./routes/message.route.js";
 
 const CLIENT_URL: string = process.env.CLIENT_URL as string;
 //1. Middleware
@@ -27,11 +28,12 @@ app.use(cookieParser());
 app.use(express.json());
 
 //2. Routes
-
-app.use(`${process.env.API_PREFIX}/auth`, AuthRoute);
+const apiPrefix = process.env.API_PREFIX;
+app.use(`${apiPrefix}/auth`, AuthRoute);
 app.use(protect);
-app.use(`${process.env.API_PREFIX}/users`, UserRoute);
-app.use(`${process.env.API_PREFIX}/friends`, FriendRoute);
+app.use(`${apiPrefix}/users`, UserRoute);
+app.use(`${apiPrefix}/friends`, FriendRoute);
+app.use(`${apiPrefix}/messages`, MessageRoute);
 
 // Error handling
 // 404 xử lý các route không tồn tại

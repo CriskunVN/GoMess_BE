@@ -11,4 +11,17 @@ export declare const acceptFriendRequestService: (requestId: string, userId: str
 export declare const declineFriendRequestService: (requestId: string, userId: string) => Promise<{
     message: string;
 }>;
+export declare const getFriendRequestsService: (userId: string) => Promise<{
+    sent: (import("mongoose").FlattenMaps<import("../types/type.js").IFriendRequest> & Required<{
+        _id: import("mongoose").FlattenMaps<unknown>;
+    }> & {
+        __v: number;
+    })[];
+    received: (import("mongoose").FlattenMaps<import("../types/type.js").IFriendRequest> & Required<{
+        _id: import("mongoose").FlattenMaps<unknown>;
+    }> & {
+        __v: number;
+    })[];
+}>;
+export declare const getAllFriendsService: (userId: string) => Promise<import("mongoose").Types.ObjectId[]>;
 //# sourceMappingURL=friend.service.d.ts.map

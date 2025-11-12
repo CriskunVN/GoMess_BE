@@ -2,9 +2,9 @@ import User from "../models/user.model.js";
 import AppError from "../utils/AppError.js";
 export const RegisterService = async (username, email, password, displayName) => {
     // kiểm tra xem email đã tồn tại chưa
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
-        throw new AppError("Email already in use", 400);
+        throw new AppError("Email or username already in use", 400);
     }
     const newUser = new User({ username, email, password, displayName });
     await newUser.save();
