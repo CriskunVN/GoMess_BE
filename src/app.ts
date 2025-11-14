@@ -19,6 +19,7 @@ import AuthRoute from "./routes/auth.route.js";
 import UserRoute from "./routes/user.route.js";
 import FriendRoute from "./routes/friend.route.js";
 import MessageRoute from "./routes/message.route.js";
+import ConversationRoute from "./routes/conversation.route.js";
 
 const CLIENT_URL: string = process.env.CLIENT_URL as string;
 //1. Middleware
@@ -34,6 +35,7 @@ app.use(protect);
 app.use(`${apiPrefix}/users`, UserRoute);
 app.use(`${apiPrefix}/friends`, FriendRoute);
 app.use(`${apiPrefix}/messages`, MessageRoute);
+app.use(`${apiPrefix}/conversations`, ConversationRoute);
 
 // Error handling
 // 404 xử lý các route không tồn tại

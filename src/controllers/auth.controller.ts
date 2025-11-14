@@ -3,8 +3,6 @@ import AppError from "../utils/AppError.js";
 import { LoginService, RegisterService } from "../services/auth.service.js";
 import catchAsync from "../utils/catchAsync.js";
 import { createTokens } from "../utils/createToken.js";
-import jwt from "jsonwebtoken";
-import User from "../models/user.model.js";
 import Session from "../models/session.model.js";
 import { REFRESH_TOKEN_EXPIRES_DAYS } from "../types/typeToken.js";
 

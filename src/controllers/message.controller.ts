@@ -6,7 +6,7 @@ import type { NextFunction, Request, Response } from "express";
 export const sendDirectMessage = catchAsync(
   async (req: Request, res: Response) => {
     const { recipientId, content, conversationId } = req.body;
-    const senderId = req.user._id;
+    const senderId: string = req.user._id;
 
     const message = await sendDirectMessageService(
       senderId,
