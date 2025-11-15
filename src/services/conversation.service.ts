@@ -1,5 +1,7 @@
 import Conversation from "../models/conversation.model.js";
+import Message from "../models/message.model.js";
 import type { IConversation, IUser } from "../types/type.js";
+import AppError from "../utils/AppError.js";
 
 export const createConversationService = async (
   userId: IUser,
@@ -75,4 +77,67 @@ export const createConversationService = async (
     },
   ]);
   return conversation;
+};
+
+export const getConversationsService = async (userId: IUser) => {
+  const conversations = await Conversation.find({
+    "participants.userId": userId,
+  })
+    .sort({ lastMessageAt: -1, updateAt: -1 })
+    .populate({
+      path: "participants.userId",
+      select: "displayName avatarUrl",
+    })
+    .populate({
+      path: "lastMessage.senderId",
+      select: "displayName avatarUrl",
+    })
+    .populate({
+      path: "seenBy",
+      select: "displayName avatarUrl",
+    });
+
+  const dataFormatted = conversations.map((convo) => {
+    const participants = (convo.participants || []).map((p: any) => ({
+      _id: p.userId?._id,
+      displayName: p.userId?.displayName,
+      avatarUrl: p.userId?.avatarUrl ?? null,
+      joinedAt: p.joinedAt,
+    }));
+
+    return {
+      ...convo.toObject(),
+      unreadCounts: convo.unreadCounts || {},
+      participants,
+    };
+  });
+
+  return dataFormatted;
+};
+
+export const getMesssagesService = async (
+  conversationId: any,
+  limit: number,
+  cursor: any
+) => {
+  const query: any = { conversationId };
+
+  if (cursor) {
+    query.createdAt = { $lt: new Date(cursor as string) };
+  }
+  let messages = await Message.find(query)
+    .sort({ createdAt: -1 })
+    .limit(Number(limit) + 1);
+
+  let nextCursor: string | null = null;
+
+  if (messages.length > Number(limit)) {
+    const nextMessage: any = messages[messages.length - 1];
+    nextCursor = nextMessage.createdAt.toISOString();
+    messages.pop();
+  }
+
+  messages = messages.reverse();
+
+  return { messages, nextCursor };
 };
