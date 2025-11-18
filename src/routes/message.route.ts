@@ -3,7 +3,10 @@ import {
   sendDirectMessage,
   sendGroupMessage,
 } from "../controllers/message.controller.js";
-import { checkFriendShip } from "../middlewares/friend.middleware.js";
+import {
+  checkFriendGroup,
+  checkFriendShip,
+} from "../middlewares/friend.middleware.js";
 
 const router = express.Router();
 
@@ -11,6 +14,6 @@ const router = express.Router();
 router.post("/direct", checkFriendShip, sendDirectMessage);
 
 // gửi tin nhắn nhóm
-router.post("/group", sendGroupMessage);
+router.post("/group", checkFriendGroup, sendGroupMessage);
 
 export default router;

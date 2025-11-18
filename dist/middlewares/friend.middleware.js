@@ -6,7 +6,7 @@ const pair = (a, b) => {
     return a < b ? [a, b] : [b, a];
 };
 export const checkFriendShip = catchAsync(async (req, res, next) => {
-    const me = req.user?._id.toString();
+    const me = req.user?._id;
     const recipientId = req.body?.recipientId ?? null;
     const memberIds = req.body?.memberIds ?? null;
     if (!recipientId && memberIds.length === 0) {
@@ -24,7 +24,7 @@ export const checkFriendShip = catchAsync(async (req, res, next) => {
     // Todo: chat nhóm
     // kiểm tra tất cả memberIds có phải là bạn bè với mình không
     const friendChecks = memberIds.map(async (memberId) => {
-        const [userA, userB] = pair(me, memberId);
+        const [userA, userB] = pair(me.toString(), memberId);
         const friendShip = (await Friend.findOne({
             userA,
             userB,
@@ -39,6 +39,20 @@ export const checkFriendShip = catchAsync(async (req, res, next) => {
     if (notFriends.length > 0) {
         throw new AppError(`Chỉ có thể thêm bạn bè vào cuộc trò chuyện nhóm. Người dùng sau không phải là bạn bè: ${notFriends.join(", ")}`, 403);
     }
+    next();
+});
+export const checkFriendGroup = catchAsync(async (req, res, next) => {
+    const senderId = req.user?._id;
+    const { conversationId } = req.body;
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) {
+        new AppError("Bạn không tìm thấy cuộc trò chuyện", 404);
+    }
+    const isCheck = await conversation?.participants.some((p) => p.userId.toString() === senderId);
+    if (!isCheck) {
+        new AppError("Bạn không phải thành viên cuộc trò chuyện này", 403);
+    }
+    req.conversation = conversation;
     next();
 });
 //# sourceMappingURL=friend.middleware.js.map

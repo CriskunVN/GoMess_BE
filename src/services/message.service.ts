@@ -1,14 +1,15 @@
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
-import type { IConversation, IMessage } from "../types/type.js";
+import type { IConversation, IMessage, IUser } from "../types/type.js";
+import AppError from "../utils/AppError.js";
 import { updateConversationAfterCreateMessage } from "../utils/message/messageHelper.js";
 
 // service gửi tin nhắn trực tiếp
 export const sendDirectMessageService = async (
-  senderId: string,
-  recipientId: string,
+  senderId: String,
+  recipientId: String,
   content: string,
-  conversationId?: string
+  conversationId?: String
 ) => {
   let conversation: IConversation | null = null;
 
@@ -41,6 +42,33 @@ export const sendDirectMessageService = async (
   })) as IMessage;
 
   updateConversationAfterCreateMessage(conversation, message, senderId);
+  await conversation.save();
+
+  return message;
+};
+
+export const sendGroupMessageService = async (
+  conversationId: String,
+  content: String,
+  senderId: String,
+  conversation: IConversation
+) => {
+  if (!content) {
+    throw new AppError("Nội dung tin nhắn không được để trống", 400);
+  }
+
+  // Tạo tin nhắn mới
+  const message: IMessage = (await Message.create({
+    conversationId: conversationId,
+    senderId,
+    content,
+  })) as IMessage;
+
+  updateConversationAfterCreateMessage(
+    conversation,
+    message,
+    senderId.toString()
+  );
   await conversation.save();
 
   return message;

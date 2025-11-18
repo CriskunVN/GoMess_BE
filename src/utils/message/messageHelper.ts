@@ -1,7 +1,7 @@
 export const updateConversationAfterCreateMessage = (
   conversation: any,
   message: any,
-  senderId: string
+  senderId: String
 ) => {
   conversation.set({
     seenBy: [],

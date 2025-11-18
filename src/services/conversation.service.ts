@@ -4,7 +4,7 @@ import type { IConversation, IUser } from "../types/type.js";
 import AppError from "../utils/AppError.js";
 
 export const createConversationService = async (
-  userId: IUser,
+  userId: String,
   name: string,
   type: "direct" | "group",
   memberIds: string[]
@@ -79,7 +79,7 @@ export const createConversationService = async (
   return conversation;
 };
 
-export const getConversationsService = async (userId: IUser) => {
+export const getConversationsService = async (userId: String) => {
   const conversations = await Conversation.find({
     "participants.userId": userId,
   })

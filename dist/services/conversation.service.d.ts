@@ -1,6 +1,6 @@
-import type { IConversation, IUser } from "../types/type.js";
-export declare const createConversationService: (userId: IUser, name: string, type: "direct" | "group", memberIds: string[]) => Promise<IConversation>;
-export declare const getConversationsService: (userId: IUser) => Promise<{
+import type { IConversation } from "../types/type.js";
+export declare const createConversationService: (userId: String, name: string, type: "direct" | "group", memberIds: string[]) => Promise<IConversation>;
+export declare const getConversationsService: (userId: String) => Promise<{
     unreadCounts: Map<string, number>;
     participants: {
         _id: any;

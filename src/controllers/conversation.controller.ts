@@ -1,4 +1,4 @@
-import type { IConversation, IUser } from "../types/type.js";
+import type { IConversation } from "../types/type.js";
 import type { Response, Request } from "express";
 import catchAsync from "../utils/catchAsync.js";
 import {
@@ -10,7 +10,7 @@ import {
 export const createConversation = catchAsync(
   async (req: Request, res: Response) => {
     const { type, name, memberIds } = req.body;
-    const userId: IUser = req.user._id;
+    const userId: String = req.user?._id as String;
 
     const conversation: IConversation = await createConversationService(
       userId,
@@ -26,7 +26,7 @@ export const createConversation = catchAsync(
 
 export const getConversations = catchAsync(
   async (req: Request, res: Response) => {
-    const userId: IUser = req.user._id;
+    const userId: String = req.user?._id as String;
     const data = await getConversationsService(userId);
     res
       .status(200)

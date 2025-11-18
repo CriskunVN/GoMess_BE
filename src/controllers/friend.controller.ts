@@ -11,7 +11,7 @@ import type { NextFunction, Request, Response } from "express";
 
 // Lấy danh sách bạn bè
 export const getAllFriends = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user._id; // user hiện tại đang xác thực
+  const userId: string = req.user?._id as string; // user hiện tại đang xác thực
 
   const friends = await getAllFriendsService(userId);
 
@@ -22,7 +22,7 @@ export const getAllFriends = catchAsync(async (req: Request, res: Response) => {
 export const sendFriendRequest = catchAsync(
   async (req: Request, res: Response) => {
     const { to, message } = req.body;
-    const from = req.user._id; // user hiện tại đang xác thực
+    const from: string = req.user?._id as string; // user hiện tại đang xác thực
     // Gọi service để gửi lời mời kết bạn
     const friendRequest = await sendFriendRequestService(from, to, message);
 
@@ -41,7 +41,7 @@ export const acceptFriendRequest = catchAsync(
       next(new AppError("Thiếu requestId", 400));
       return;
     }
-    const user = req.user._id; // user hiện tại đang xác thực
+    const user: string = req.user?._id as string; // user hiện tại đang xác thực
 
     const data = await acceptFriendRequestService(requestId, user);
 
@@ -64,7 +64,7 @@ export const declineFriendRequest = catchAsync(
     if (!requestId) {
       throw new AppError("Thiếu requestId", 400);
     }
-    const user = req.user._id; // user hiện tại đang xác thực
+    const user: string = req.user?._id as string; // user hiện tại đang xác thực
 
     const { message } = await declineFriendRequestService(requestId, user);
     // Trả về phản hồi
@@ -75,7 +75,7 @@ export const declineFriendRequest = catchAsync(
 // Lấy danh sách lời mời kết bạn
 export const getFriendRequest = catchAsync(
   async (req: Request, res: Response) => {
-    const userId = req.user._id; // user hiện tại đang xác thực
+    const userId: string = req.user?._id as string; // user hiện tại đang xác thực
     const { sent, received } = await getFriendRequestsService(userId);
     res.status(200).json({
       message: "Lấy danh sách lời mời kết bạn",

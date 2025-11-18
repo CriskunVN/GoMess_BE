@@ -1,5 +1,6 @@
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
+import AppError from "../utils/AppError.js";
 import { updateConversationAfterCreateMessage } from "../utils/message/messageHelper.js";
 // service gửi tin nhắn trực tiếp
 export const sendDirectMessageService = async (senderId, recipientId, content, conversationId) => {
@@ -32,6 +33,20 @@ export const sendDirectMessageService = async (senderId, recipientId, content, c
         content,
     }));
     updateConversationAfterCreateMessage(conversation, message, senderId);
+    await conversation.save();
+    return message;
+};
+export const sendGroupMessageService = async (conversationId, content, senderId, conversation) => {
+    if (!content) {
+        throw new AppError("Nội dung tin nhắn không được để trống", 400);
+    }
+    // Tạo tin nhắn mới
+    const message = (await Message.create({
+        conversationId: conversationId,
+        senderId,
+        content,
+    }));
+    updateConversationAfterCreateMessage(conversation, message, senderId.toString());
     await conversation.save();
     return message;
 };

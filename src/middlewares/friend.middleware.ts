@@ -11,7 +11,7 @@ const pair = (a: string, b: string) => {
 
 export const checkFriendShip = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const me = req.user?._id.toString();
+    const me: string = req.user?._id as string;
 
     const recipientId: string = req.body?.recipientId ?? null;
     const memberIds: string[] = req.body?.memberIds ?? null;
@@ -33,7 +33,7 @@ export const checkFriendShip = catchAsync(
     // Todo: chat nhóm
     // kiểm tra tất cả memberIds có phải là bạn bè với mình không
     const friendChecks = memberIds.map(async (memberId) => {
-      const [userA, userB] = pair(me, memberId);
+      const [userA, userB] = pair(me.toString(), memberId);
       const friendShip: IFriend = (await Friend.findOne({
         userA,
         userB,
@@ -55,6 +55,31 @@ export const checkFriendShip = catchAsync(
         403
       );
     }
+    next();
+  }
+);
+
+export const checkFriendGroup = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const senderId: String = req.user?._id as String;
+    const { conversationId } = req.body;
+
+    const conversation = await Conversation.findById(conversationId);
+
+    if (!conversation) {
+      new AppError("Bạn không tìm thấy cuộc trò chuyện", 404);
+    }
+
+    const isCheck = await conversation?.participants.some(
+      (p: any) => p.userId.toString() === senderId
+    );
+
+    if (!isCheck) {
+      new AppError("Bạn không phải thành viên cuộc trò chuyện này", 403);
+    }
+
+    req.conversation = conversation;
+
     next();
   }
 );
