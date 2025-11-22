@@ -34,6 +34,7 @@
 
     // Module Resolution Options
     "typeRoots": ["./node_modules/@types", "./src/types"],
+    "resolveJsonModule": true,
 
     // Recommended Options
     "strict": true,
