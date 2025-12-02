@@ -27,7 +27,8 @@ export const checkFriendShip = catchAsync(
       if (!isFriendShip) {
         throw new AppError("Chỉ có thể gửi tin nhắn cho bạn bè", 403);
       }
-      next();
+      // Đảm bảo chỉ gọi next() một lần cho nhánh 1-1
+      return next();
     }
 
     // Todo: chat nhóm
@@ -55,7 +56,7 @@ export const checkFriendShip = catchAsync(
         403
       );
     }
-    next();
+    return next();
   }
 );
 
@@ -67,7 +68,7 @@ export const checkFriendGroup = catchAsync(
     const conversation = await Conversation.findById(conversationId);
 
     if (!conversation) {
-      new AppError("Bạn không tìm thấy cuộc trò chuyện", 404);
+      throw new AppError("Bạn không tìm thấy cuộc trò chuyện", 404);
     }
 
     const isCheck = await conversation?.participants.some(
@@ -75,11 +76,11 @@ export const checkFriendGroup = catchAsync(
     );
 
     if (!isCheck) {
-      new AppError("Bạn không phải thành viên cuộc trò chuyện này", 403);
+      throw new AppError("Bạn không phải thành viên cuộc trò chuyện này", 403);
     }
 
     req.conversation = conversation;
 
-    next();
+    return next();
   }
 );
