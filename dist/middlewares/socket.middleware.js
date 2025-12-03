@@ -14,7 +14,6 @@ export const socketAuthMiddleware = async (socket, next) => {
         let decoded;
         try {
             decoded = jwt.verify(token, secretKey);
-            console.log("Token đã giải mã:", decoded);
         }
         catch (err) {
             return next(new AppError("Token đã hết hạn , vui lòng đăng nhập lại", 401));

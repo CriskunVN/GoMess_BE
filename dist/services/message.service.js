@@ -1,7 +1,8 @@
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
+import { io } from "../sockets/index.js";
 import AppError from "../utils/AppError.js";
-import { updateConversationAfterCreateMessage } from "../utils/message/messageHelper.js";
+import { emitNewMessage, updateConversationAfterCreateMessage, } from "../utils/message/messageHelper.js";
 // service gửi tin nhắn trực tiếp
 export const sendDirectMessageService = async (senderId, recipientId, content, conversationId) => {
     let conversation = null;
@@ -34,6 +35,7 @@ export const sendDirectMessageService = async (senderId, recipientId, content, c
     }));
     updateConversationAfterCreateMessage(conversation, message, senderId);
     await conversation.save();
+    emitNewMessage(io, conversation, message);
     return message;
 };
 export const sendGroupMessageService = async (conversationId, content, senderId, conversation) => {
@@ -48,6 +50,7 @@ export const sendGroupMessageService = async (conversationId, content, senderId,
     }));
     updateConversationAfterCreateMessage(conversation, message, senderId.toString());
     await conversation.save();
+    emitNewMessage(io, conversation, message);
     return message;
 };
 //# sourceMappingURL=message.service.js.map

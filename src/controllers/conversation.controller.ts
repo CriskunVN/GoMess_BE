@@ -6,6 +6,7 @@ import {
   getConversationsService,
   getMesssagesService,
 } from "../services/conversation.service.js";
+import Conversation from "../models/conversation.model.js";
 
 export const createConversation = catchAsync(
   async (req: Request, res: Response) => {
@@ -46,3 +47,18 @@ export const getMessages = catchAsync(async (req: Request, res: Response) => {
 
   res.status(200).json({ messages, nextCursor });
 });
+
+export const getUserConversationsForSocketIO = async (userId: String) => {
+  try {
+    const conversations: IConversation[] = await Conversation.find(
+      { "participants.userId": userId },
+      {
+        _id: 1,
+      }
+    );
+    return conversations.map((conv: any) => conv._id.toString());
+  } catch (error) {
+    console.error("Lỗi lấy cuộc trò chuyện cho Socket.IO:", error);
+    return [];
+  }
+};

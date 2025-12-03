@@ -1,3 +1,4 @@
+import { io } from "../../sockets/index.js";
 export const updateConversationAfterCreateMessage = (conversation, message, senderId) => {
     conversation.set({
         seenBy: [],
@@ -14,6 +15,17 @@ export const updateConversationAfterCreateMessage = (conversation, message, send
         const isSender = memberId === senderId.toString();
         const preCount = conversation.unreadCounts.get(memberId) || 0;
         conversation.unreadCounts.set(memberId, isSender ? 0 : preCount + 1);
+    });
+};
+export const emitNewMessage = (io, conversation, message) => {
+    io.to(conversation._id.toString()).emit("new-message", {
+        message,
+        conversation: {
+            _id: conversation._id.toString(),
+            lastMessage: conversation.lastMessage,
+            lastMessageAt: conversation.lastMessageAt,
+        },
+        unreadCounts: conversation.unreadCounts,
     });
 };
 //# sourceMappingURL=messageHelper.js.map

@@ -62,25 +62,39 @@ export const checkFriendShip = catchAsync(
 
 export const checkFriendGroup = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const senderId: String = req.user?._id as String;
+    // 1) đảm bảo đã xác thực
+    if (!req.user) {
+      return next(
+        new AppError("Bạn cần đăng nhập để thực hiện hành động này", 401)
+      );
+    }
+
+    // 2) chuẩn hoá senderId
+    const senderId: string = String(req.user._id);
     const { conversationId } = req.body;
 
     const conversation = await Conversation.findById(conversationId);
 
     if (!conversation) {
-      throw new AppError("Bạn không tìm thấy cuộc trò chuyện", 404);
+      return next(new AppError("Bạn không tìm thấy cuộc trò chuyện", 404));
     }
 
-    const isCheck = await conversation?.participants.some(
-      (p: any) => p.userId.toString() === senderId
-    );
+    // đảm bảo participants là mảng trước khi gọi some
+    const participants = Array.isArray((conversation as any).participants)
+      ? (conversation as any).participants
+      : [];
 
-    if (!isCheck) {
-      throw new AppError("Bạn không phải thành viên cuộc trò chuyện này", 403);
+    const isParticipant = participants.some((p: any) => {
+      return String(p.userId) === senderId;
+    });
+
+    if (!isParticipant) {
+      return next(
+        new AppError("Bạn không phải thành viên cuộc trò chuyện này", 403)
+      );
     }
 
     req.conversation = conversation;
-
     return next();
   }
 );
