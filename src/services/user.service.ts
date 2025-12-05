@@ -35,3 +35,20 @@ export const deleteUser = async (id: string) => {
     throw new AppError("User not found", 404);
   }
 };
+
+export const searchUsers = async (query: string) => {
+  const users = await User.find({
+    $or: [
+      { username: { $regex: query, $options: "i" } },
+      { email: { $regex: query, $options: "i" } },
+    ],
+  }).select("-password");
+
+  const res = users.map((user) => ({
+    id: user._id,
+    username: user.displayName,
+    email: user.email,
+    avatarUrl: user.avatarUrl,
+  }));
+  return res;
+};

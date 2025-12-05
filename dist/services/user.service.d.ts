@@ -14,4 +14,10 @@ export declare const updateUser: (id: string, updateData: any) => Promise<import
     __v: number;
 }>;
 export declare const deleteUser: (id: string) => Promise<void>;
+export declare const searchUsers: (query: string) => Promise<{
+    id: unknown;
+    username: string;
+    email: string;
+    avatarUrl: string | undefined;
+}[]>;
 //# sourceMappingURL=user.service.d.ts.map

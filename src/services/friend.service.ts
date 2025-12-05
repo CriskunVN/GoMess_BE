@@ -131,7 +131,7 @@ export const getAllFriendsService = async (userId: string) => {
   }
 
   const friend = friendShip.map((f) =>
-    f.userA._id.toString() === userId ? f.userB : f.userA
+    String(f.userA._id) === String(userId) ? f.userB : f.userA
   );
 
   return friend;

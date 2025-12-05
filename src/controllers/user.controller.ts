@@ -81,3 +81,22 @@ export const softDeleteUser = catchAsync(
     res.status(204).json({ status: "success", data: null });
   }
 );
+
+export const searchUsers = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { q } = req.query;
+
+    if (!q || typeof q !== "string") {
+      return next(
+        new AppError(
+          "Nhập tham số truy vấn 'q' là bắt buộc và phải là chuỗi",
+          400
+        )
+      );
+    }
+
+    const users = await userService.searchUsers(q);
+
+    res.status(200).json({ status: "success", data: { users } });
+  }
+);

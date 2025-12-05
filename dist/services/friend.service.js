@@ -97,7 +97,7 @@ export const getAllFriendsService = async (userId) => {
     if (!friendShip) {
         return [];
     }
-    const friend = friendShip.map((f) => f.userA._id.toString() === userId ? f.userB : f.userA);
+    const friend = friendShip.map((f) => String(f.userA._id) === String(userId) ? f.userB : f.userA);
     return friend;
 };
 //# sourceMappingURL=friend.service.js.map

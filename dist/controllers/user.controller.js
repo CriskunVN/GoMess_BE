@@ -50,4 +50,12 @@ export const softDeleteUser = catchAsync(async (req, res, next) => {
     await userService.updateUser(req.user._id, { isActive: false });
     res.status(204).json({ status: "success", data: null });
 });
+export const searchUsers = catchAsync(async (req, res, next) => {
+    const { q } = req.query;
+    if (!q || typeof q !== "string") {
+        return next(new AppError("Nhập tham số truy vấn 'q' là bắt buộc và phải là chuỗi", 400));
+    }
+    const users = await userService.searchUsers(q);
+    res.status(200).json({ status: "success", data: { users } });
+});
 //# sourceMappingURL=user.controller.js.map

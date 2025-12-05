@@ -4,6 +4,8 @@ import { protect, restrictTo } from "../middlewares/protectAuth.middleware.js";
 const router = express.Router();
 // Lấy thông tin người dùng hiện tại
 router.get("/me", userController.getCurrentUser);
+// search user
+router.route("/search").get(userController.searchUsers); // Tìm kiếm người dùng
 // Lấy thông tin người dùng theo ID
 router
     .route("/:id")
