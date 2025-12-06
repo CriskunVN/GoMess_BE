@@ -32,6 +32,37 @@ io.on("connection", async (socket) => {
     socket.join(conversationId);
   });
 
+  // Socket event: User đánh dấu đã đọc tin nhắn
+  socket.on("mark-as-read", async (data: { conversationId: string }) => {
+    try {
+      const { conversationId } = data;
+      const userId = user._id.toString();
+
+      // Import service để xử lý
+      const { markConversationAsReadService } = await import(
+        "../services/conversation.service.js"
+      );
+
+      // Đánh dấu đã đọc
+      const conversation = await markConversationAsReadService(
+        conversationId,
+        userId
+      );
+
+      // Emit event đến tất cả users trong conversation
+      io.to(conversationId).emit("message-read", {
+        conversationId: conversationId,
+        userId: userId,
+        seenBy: conversation.seenBy,
+        timestamp: new Date(),
+      });
+    } catch (error: any) {
+      socket.emit("error", {
+        message: error.message || "Lỗi khi đánh dấu đã đọc",
+      });
+    }
+  });
+
   // Correct built-in event name is 'disconnect'
   socket.on("disconnect", (reason) => {
     onlineUsers.delete(user._id);

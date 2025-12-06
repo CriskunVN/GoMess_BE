@@ -110,4 +110,33 @@ export const getMesssagesService = async (conversationId, limit, cursor) => {
     messages = messages.reverse();
     return { messages, nextCursor };
 };
+export const markConversationAsReadService = async (conversationId, userId) => {
+    // Tìm conversation
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) {
+        throw new AppError("Không tìm thấy cuộc trò chuyện", 404);
+    }
+    // Kiểm tra user có phải là thành viên của conversation không
+    const isParticipant = conversation.participants.some((p) => p.userId.toString() === userId.toString());
+    if (!isParticipant) {
+        throw new AppError("Bạn không phải là thành viên của cuộc trò chuyện này", 403);
+    }
+    // Reset unreadCount của user về 0
+    if (conversation.unreadCounts.get(userId.toString()) !== 0) {
+        conversation.unreadCounts.set(userId.toString(), 0);
+    }
+    // Lấy senderId của tin nhắn cuối cùng
+    const lastMessage = conversation.lastMessage;
+    const lastMessageSenderId = lastMessage?.senderId?.toString();
+    // Chỉ thêm vào seenBy nếu:
+    // 1. User chưa có trong seenBy
+    // 2. User KHÔNG phải là người gửi tin nhắn cuối cùng
+    const isAlreadySeen = conversation.seenBy.some((id) => id.toString() === userId.toString());
+    const isLastSender = lastMessageSenderId === userId.toString();
+    if (!isAlreadySeen && !isLastSender) {
+        conversation.seenBy.push(userId);
+    }
+    await conversation.save();
+    return conversation;
+};
 //# sourceMappingURL=conversation.service.js.map

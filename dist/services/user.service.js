@@ -31,18 +31,16 @@ export const deleteUser = async (id) => {
     }
 };
 export const searchUsers = async (query) => {
+    const populateFields = "_id username displayName avatarUrl";
     const users = await User.find({
         $or: [
             { username: { $regex: query, $options: "i" } },
             { email: { $regex: query, $options: "i" } },
         ],
-    }).select("-password");
-    const res = users.map((user) => ({
-        id: user._id,
-        username: user.displayName,
-        email: user.email,
-        avatarUrl: user.avatarUrl,
-    }));
-    return res;
+    })
+        .populate(populateFields)
+        .select("-password")
+        .lean();
+    return users;
 };
 //# sourceMappingURL=user.service.js.map

@@ -36,4 +36,9 @@ export declare const getMesssagesService: (conversationId: any, limit: number, c
     })[];
     nextCursor: string | null;
 }>;
+export declare const markConversationAsReadService: (conversationId: string, userId: string) => Promise<import("mongoose").Document<unknown, {}, IConversation, {}, {}> & IConversation & Required<{
+    _id: unknown;
+}> & {
+    __v: number;
+}>;
 //# sourceMappingURL=conversation.service.d.ts.map

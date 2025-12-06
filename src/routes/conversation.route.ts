@@ -4,6 +4,7 @@ import {
   createConversation,
   getConversations,
   getMessages,
+  markAsRead,
 } from "../controllers/conversation.controller.js";
 import { checkFriendShip } from "../middlewares/friend.middleware.js";
 
@@ -14,4 +15,5 @@ router.get("/", getConversations);
 
 router.get("/:conversationId/messages", getMessages);
 
+router.put("/:conversationId/read", markAsRead);
 export default router;

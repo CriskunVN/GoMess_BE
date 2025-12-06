@@ -1,7 +1,7 @@
 import { io } from "../../sockets/index.js";
 export const updateConversationAfterCreateMessage = (conversation, message, senderId) => {
     conversation.set({
-        seenBy: [],
+        seenBy: [senderId], // Người gửi tự động "đã xem"
         lastMessageAt: message.createdAt,
         lastMessage: {
             _id: message._id,

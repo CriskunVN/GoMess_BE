@@ -8,7 +8,7 @@ export const sendFriendRequestService = async (fromUserId, toUserId, message) =>
     if (fromUserId.toString() === toUserId) {
         throw new AppError("Không thể gửi lời mời kết bạn cho chính mình", 400);
     }
-    console.log(toUserId);
+    console.log("userid:", toUserId);
     // kiểm tra user nhận lời mời kết bạn có tồn tại không
     const userExists = await User.exists({ _id: toUserId });
     if (!userExists) {

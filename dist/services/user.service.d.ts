@@ -14,10 +14,9 @@ export declare const updateUser: (id: string, updateData: any) => Promise<import
     __v: number;
 }>;
 export declare const deleteUser: (id: string) => Promise<void>;
-export declare const searchUsers: (query: string) => Promise<{
-    id: unknown;
-    username: string;
-    email: string;
-    avatarUrl: string | undefined;
-}[]>;
+export declare const searchUsers: (query: string) => Promise<(import("mongoose").FlattenMaps<import("../types/type.js").IUser> & Required<{
+    _id: import("mongoose").FlattenMaps<unknown>;
+}> & {
+    __v: number;
+})[]>;
 //# sourceMappingURL=user.service.d.ts.map

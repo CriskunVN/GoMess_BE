@@ -12,7 +12,7 @@ export const RegisterService = async (
   const existingUser = await User.findOne({ $or: [{ email }, { username }] });
 
   if (existingUser) {
-    throw new AppError("Email or username already in use", 400);
+    throw new AppError("Email hoặc tên đăng nhập đã được sử dụng", 400);
   }
 
   const newUser = new User({ username, email, password, displayName });
@@ -24,17 +24,17 @@ export const RegisterService = async (
 export const LoginService = async (username: string, password: string) => {
   // Validate input
   if (!username || !password) {
-    throw new AppError("Username and password are required.", 400);
+    throw new AppError("Tên đăng nhập và mật khẩu là bắt buộc.", 400);
   }
 
   // Tìm người dùng theo username
   const user = await User.findOne({ username }).select("+password");
   if (!user) {
-    throw new AppError("Invalid username or password", 400);
+    throw new AppError("Tài khoản hoặc mật khẩu không đúng", 400);
   }
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
-    throw new AppError("Invalid username or password", 400);
+    throw new AppError("Tài khoản hoặc mật khẩu không đúng", 400);
   }
   // ẩn password trước khi trả về
   user.password = undefined as any;

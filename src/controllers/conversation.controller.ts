@@ -5,8 +5,10 @@ import {
   createConversationService,
   getConversationsService,
   getMesssagesService,
+  markConversationAsReadService,
 } from "../services/conversation.service.js";
 import Conversation from "../models/conversation.model.js";
+import { getIO } from "../sockets/index.js";
 
 export const createConversation = catchAsync(
   async (req: Request, res: Response) => {
@@ -62,3 +64,41 @@ export const getUserConversationsForSocketIO = async (userId: String) => {
     return [];
   }
 };
+
+export const markAsRead = catchAsync(async (req: Request, res: Response) => {
+  const { conversationId } = req.params;
+  const userId = req.user?._id?.toString();
+
+  if (!conversationId || !userId) {
+    res.status(400).json({
+      status: "error",
+      message: "Thiếu conversationId hoặc userId",
+    });
+    return;
+  }
+
+  // Gọi service để đánh dấu đã đọc
+  const conversation = await markConversationAsReadService(
+    conversationId,
+    userId
+  );
+
+  // Emit socket event đến tất cả users trong conversation
+  const io = getIO();
+  io.to(conversationId).emit("message-read", {
+    conversationId: conversationId,
+    userId: userId,
+    seenBy: conversation.seenBy,
+    timestamp: new Date(),
+  });
+
+  res.status(200).json({
+    status: "success",
+    message: "Đánh dấu đã đọc thành công",
+    data: {
+      conversationId: conversation._id,
+      unreadCount: conversation.unreadCounts.get(userId) || 0,
+      seenBy: conversation.seenBy,
+    },
+  });
+});

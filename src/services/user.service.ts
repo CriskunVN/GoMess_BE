@@ -37,18 +37,17 @@ export const deleteUser = async (id: string) => {
 };
 
 export const searchUsers = async (query: string) => {
+  const populateFields: string = "_id username displayName avatarUrl";
+
   const users = await User.find({
     $or: [
       { username: { $regex: query, $options: "i" } },
       { email: { $regex: query, $options: "i" } },
     ],
-  }).select("-password");
+  })
+    .populate(populateFields)
+    .select("-password")
+    .lean();
 
-  const res = users.map((user) => ({
-    id: user._id,
-    username: user.displayName,
-    email: user.email,
-    avatarUrl: user.avatarUrl,
-  }));
-  return res;
+  return users;
 };
