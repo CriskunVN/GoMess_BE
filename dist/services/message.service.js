@@ -3,11 +3,14 @@ import Message from "../models/message.model.js";
 import { io } from "../sockets/index.js";
 import AppError from "../utils/AppError.js";
 import { emitNewMessage, updateConversationAfterCreateMessage, } from "../utils/message/messageHelper.js";
-// service gửi tin nhắn trực tiếp
-export const sendDirectMessageService = async (senderId, recipientId, content, conversationId) => {
+import { uploadFileToCloudinary, getMessageTypeFromMimeType, } from "./upload.service.js";
+// service gửi tin nhắn trực tiếp (có thể có file hoặc không)
+export const sendDirectMessageService = async (senderId, recipientId, content, conversationId, file // Thêm tham số file (optional)
+) => {
     let conversation = null;
-    if (!content) {
-        throw new Error("Nội dung tin nhắn không được để trống");
+    // Validate: phải có content HOẶC file
+    if (!content && !file) {
+        throw new AppError("Tin nhắn phải có nội dung hoặc file", 400);
     }
     // Tìm cuộc trò chuyện hiện có giữa hai người dùng
     if (conversationId) {
@@ -16,38 +19,82 @@ export const sendDirectMessageService = async (senderId, recipientId, content, c
     }
     // Nếu không tìm thấy cuộc trò chuyện, tạo cuộc trò chuyện mới
     if (!conversation) {
-        conversation =
-            (await Conversation.create({
-                type: "direct",
-                participants: [
-                    { userId: senderId, joinedAt: new Date() },
-                    { userId: recipientId, joinedAt: new Date() },
-                ],
-                lastMessageAt: new Date(),
-                unreadCounts: new Map(),
-            })) || null;
+        conversation = (await Conversation.findOne({
+            type: "direct",
+            "participants.userId": { $all: [senderId, recipientId] },
+        }));
+        if (!conversation) {
+            conversation =
+                (await Conversation.create({
+                    type: "direct",
+                    participants: [
+                        { userId: senderId, joinedAt: new Date() },
+                        { userId: recipientId, joinedAt: new Date() },
+                    ],
+                    lastMessageAt: new Date(),
+                    unreadCounts: new Map(),
+                })) || null;
+        }
     }
-    // Tạo tin nhắn mới
-    const message = (await Message.create({
+    // Chuẩn bị data cho message
+    let messageData = {
         conversationId: conversation._id,
         senderId,
-        content,
-    }));
+        content: content || "",
+        messageType: "text",
+    };
+    // Nếu có file, upload lên Cloudinary
+    if (file) {
+        const uploadResult = await uploadFileToCloudinary(file.buffer, file.originalname, file.mimetype);
+        messageData.messageType = getMessageTypeFromMimeType(file.mimetype);
+        messageData.fileUrl = uploadResult.fileUrl;
+        messageData.thumbnailUrl = uploadResult.thumbnailUrl; // Thumbnail cho preview
+        messageData.optimizedUrl = uploadResult.optimizedUrl; // URL tối ưu
+        messageData.fileInfo = {
+            fileName: uploadResult.fileName,
+            fileSize: uploadResult.fileSize,
+            mimeType: uploadResult.mimeType,
+            width: uploadResult.width,
+            height: uploadResult.height,
+        };
+    }
+    // Tạo tin nhắn mới
+    const message = (await Message.create(messageData));
     updateConversationAfterCreateMessage(conversation, message, senderId);
     await conversation.save();
     emitNewMessage(io, conversation, message);
     return message;
 };
-export const sendGroupMessageService = async (conversationId, content, senderId, conversation) => {
-    if (!content) {
-        throw new AppError("Nội dung tin nhắn không được để trống", 400);
+export const sendGroupMessageService = async (conversationId, content, senderId, conversation, file // Thêm tham số file (optional)
+) => {
+    // Validate: phải có content HOẶC file
+    if (!content && !file) {
+        throw new AppError("Tin nhắn phải có nội dung hoặc file", 400);
     }
-    // Tạo tin nhắn mới
-    const message = (await Message.create({
+    // Chuẩn bị data cho message
+    let messageData = {
         conversationId: conversationId,
         senderId,
-        content,
-    }));
+        content: content || "",
+        messageType: "text",
+    };
+    // Nếu có file, upload lên Cloudinary
+    if (file) {
+        const uploadResult = await uploadFileToCloudinary(file.buffer, file.originalname, file.mimetype);
+        messageData.messageType = getMessageTypeFromMimeType(file.mimetype);
+        messageData.fileUrl = uploadResult.fileUrl;
+        messageData.thumbnailUrl = uploadResult.thumbnailUrl; // Thumbnail cho preview
+        messageData.optimizedUrl = uploadResult.optimizedUrl; // URL tối ưu
+        messageData.fileInfo = {
+            fileName: uploadResult.fileName,
+            fileSize: uploadResult.fileSize,
+            mimeType: uploadResult.mimeType,
+            width: uploadResult.width,
+            height: uploadResult.height,
+        };
+    }
+    // Tạo tin nhắn mới
+    const message = (await Message.create(messageData));
     updateConversationAfterCreateMessage(conversation, message, senderId.toString());
     await conversation.save();
     emitNewMessage(io, conversation, message);

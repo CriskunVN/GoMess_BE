@@ -7,13 +7,14 @@ import {
   checkFriendGroup,
   checkFriendShip,
 } from "../middlewares/friend.middleware.js";
+import { uploadSingleFile } from "../middlewares/upload.middleware.js";
 
 const router = express.Router();
 
-// gửi tin nhắn trực tiếp
-router.post("/direct", checkFriendShip, sendDirectMessage);
+// gửi tin nhắn trực tiếp (có thể có file hoặc không)
+router.post("/direct", uploadSingleFile, checkFriendShip, sendDirectMessage);
 
-// gửi tin nhắn nhóm
-router.post("/group", checkFriendGroup, sendGroupMessage);
+// gửi tin nhắn nhóm (có thể có file hoặc không)
+router.post("/group", uploadSingleFile, checkFriendGroup, sendGroupMessage);
 
 export default router;

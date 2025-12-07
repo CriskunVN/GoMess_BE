@@ -13,10 +13,33 @@ const messageSchema = new mongoose.Schema({
     },
     content: {
         type: String,
-        required: true,
+        default: "",
     },
-    imgUrl: {
+    // Loại tin nhắn: text, image, video, file
+    messageType: {
         type: String,
+        enum: ["text", "image", "video", "file"],
+        default: "text",
+    },
+    // URL của file (image/video/file)
+    fileUrl: {
+        type: String,
+    },
+    // Thumbnail URL cho images (tối ưu cho preview)
+    thumbnailUrl: {
+        type: String,
+    },
+    // Optimized URL cho hiển thị (tối ưu quality + size)
+    optimizedUrl: {
+        type: String,
+    },
+    // Thông tin file
+    fileInfo: {
+        fileName: String,
+        fileSize: Number, // bytes
+        mimeType: String,
+        width: Number,
+        height: Number,
     },
 }, {
     timestamps: true,

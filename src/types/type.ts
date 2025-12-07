@@ -10,7 +10,17 @@ export interface IMessage extends Document {
   conversationId: mongoose.Schema.Types.ObjectId;
   senderId: mongoose.Schema.Types.ObjectId;
   content: string;
-  imgUrl?: string;
+  messageType: "text" | "image" | "video" | "file";
+  fileUrl?: string;
+  thumbnailUrl?: string; // Thumbnail tối ưu cho preview
+  optimizedUrl?: string; // URL tối ưu cho hiển thị
+  fileInfo?: {
+    fileName: string;
+    fileSize: number;
+    mimeType: string;
+    width?: number;
+    height?: number;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
