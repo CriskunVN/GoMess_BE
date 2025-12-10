@@ -4,7 +4,9 @@ import { io } from "../sockets/index.js";
 import AppError from "../utils/AppError.js";
 import { emitNewMessage, updateConversationAfterCreateMessage, } from "../utils/message/messageHelper.js";
 import { uploadFileToCloudinary, getMessageTypeFromMimeType, } from "./upload.service.js";
-// service gửi tin nhắn trực tiếp (có thể có file hoặc không)
+// =======================================
+// service gửi tin nhắn trực tiếp
+// =======================================
 export const sendDirectMessageService = async (senderId, recipientId, content, conversationId, file // Thêm tham số file (optional)
 ) => {
     let conversation = null;
@@ -36,28 +38,34 @@ export const sendDirectMessageService = async (senderId, recipientId, content, c
                 })) || null;
         }
     }
-    // Chuẩn bị data cho message
-    let messageData = {
-        conversationId: conversation._id,
-        senderId,
-        content: content || "",
-        messageType: "text",
-    };
-    // Nếu có file, upload lên Cloudinary
-    if (file) {
-        const uploadResult = await uploadFileToCloudinary(file.buffer, file.originalname, file.mimetype);
-        messageData.messageType = getMessageTypeFromMimeType(file.mimetype);
-        messageData.fileUrl = uploadResult.fileUrl;
-        messageData.thumbnailUrl = uploadResult.thumbnailUrl; // Thumbnail cho preview
-        messageData.optimizedUrl = uploadResult.optimizedUrl; // URL tối ưu
-        messageData.fileInfo = {
-            fileName: uploadResult.fileName,
-            fileSize: uploadResult.fileSize,
-            mimeType: uploadResult.mimeType,
-            width: uploadResult.width,
-            height: uploadResult.height,
-        };
-    }
+    const messageData = await messageDataToUpload(file, String(conversation._id), senderId, content);
+    // // Chuẩn bị data cho message
+    // let messageData: any = {
+    //   conversationId: conversation._id,
+    //   senderId,
+    //   content: content || "",
+    //   messageType: "text",
+    // };
+    // // Nếu có file, upload lên Cloudinary
+    // if (file) {
+    //   const uploadResult = await uploadFileToCloudinary(
+    //     file.buffer,
+    //     file.originalname,
+    //     file.mimetype
+    //   );
+    //   messageData.messageType = getMessageTypeFromMimeType(file.mimetype);
+    //   messageData.content = content || getMessageTypeFromMimeType(file.mimetype);
+    //   messageData.fileUrl = uploadResult.fileUrl;
+    //   messageData.thumbnailUrl = uploadResult.thumbnailUrl; // Thumbnail cho preview
+    //   messageData.optimizedUrl = uploadResult.optimizedUrl; // URL tối ưu
+    //   messageData.fileInfo = {
+    //     fileName: uploadResult.fileName,
+    //     fileSize: uploadResult.fileSize,
+    //     mimeType: uploadResult.mimeType,
+    //     width: uploadResult.width,
+    //     height: uploadResult.height,
+    //   };
+    // }
     // Tạo tin nhắn mới
     const message = (await Message.create(messageData));
     updateConversationAfterCreateMessage(conversation, message, senderId);
@@ -65,13 +73,51 @@ export const sendDirectMessageService = async (senderId, recipientId, content, c
     emitNewMessage(io, conversation, message);
     return message;
 };
+// =======================================
+// service gửi tin nhắn nhóm
+// =======================================
 export const sendGroupMessageService = async (conversationId, content, senderId, conversation, file // Thêm tham số file (optional)
 ) => {
     // Validate: phải có content HOẶC file
     if (!content && !file) {
         throw new AppError("Tin nhắn phải có nội dung hoặc file", 400);
     }
-    // Chuẩn bị data cho message
+    const messageData = await messageDataToUpload(file, conversationId, senderId, content);
+    // // Chuẩn bị data cho message
+    // let messageData: any = {
+    //   conversationId: conversationId,
+    //   senderId,
+    //   content: content || "",
+    //   messageType: "text",
+    // };
+    // // Nếu có file, upload lên Cloudinary
+    // if (file) {
+    //   const uploadResult = await uploadFileToCloudinary(
+    //     file.buffer,
+    //     file.originalname,
+    //     file.mimetype
+    //   );
+    //   messageData.messageType = getMessageTypeFromMimeType(file.mimetype);
+    //   messageData.content = content || getMessageTypeFromMimeType(file.mimetype);
+    //   messageData.fileUrl = uploadResult.fileUrl;
+    //   messageData.thumbnailUrl = uploadResult.thumbnailUrl; // Thumbnail cho preview
+    //   messageData.optimizedUrl = uploadResult.optimizedUrl; // URL tối ưu
+    //   messageData.fileInfo = {
+    //     fileName: uploadResult.fileName,
+    //     fileSize: uploadResult.fileSize,
+    //     mimeType: uploadResult.mimeType,
+    //     width: uploadResult.width,
+    //     height: uploadResult.height,
+    //   };
+    // }
+    // Tạo tin nhắn mới
+    const message = (await Message.create(messageData));
+    updateConversationAfterCreateMessage(conversation, message, senderId.toString());
+    await conversation.save();
+    emitNewMessage(io, conversation, message);
+    return message;
+};
+const messageDataToUpload = async (file, conversationId, senderId, content) => {
     let messageData = {
         conversationId: conversationId,
         senderId,
@@ -82,6 +128,7 @@ export const sendGroupMessageService = async (conversationId, content, senderId,
     if (file) {
         const uploadResult = await uploadFileToCloudinary(file.buffer, file.originalname, file.mimetype);
         messageData.messageType = getMessageTypeFromMimeType(file.mimetype);
+        messageData.content = content || getMessageTypeFromMimeType(file.mimetype);
         messageData.fileUrl = uploadResult.fileUrl;
         messageData.thumbnailUrl = uploadResult.thumbnailUrl; // Thumbnail cho preview
         messageData.optimizedUrl = uploadResult.optimizedUrl; // URL tối ưu
@@ -93,11 +140,6 @@ export const sendGroupMessageService = async (conversationId, content, senderId,
             height: uploadResult.height,
         };
     }
-    // Tạo tin nhắn mới
-    const message = (await Message.create(messageData));
-    updateConversationAfterCreateMessage(conversation, message, senderId.toString());
-    await conversation.save();
-    emitNewMessage(io, conversation, message);
-    return message;
+    return messageData;
 };
 //# sourceMappingURL=message.service.js.map

@@ -7,7 +7,10 @@ import {
   checkFriendGroup,
   checkFriendShip,
 } from "../middlewares/friend.middleware.js";
-import { uploadSingleFile } from "../middlewares/upload.middleware.js";
+import {
+  uploadSingleFile,
+  uploadMultipleFiles,
+} from "../middlewares/upload.middleware.js";
 
 const router = express.Router();
 
