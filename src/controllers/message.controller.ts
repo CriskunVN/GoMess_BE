@@ -5,7 +5,6 @@ import {
 import catchAsync from "../utils/catchAsync.js";
 import type { NextFunction, Request, Response } from "express";
 import type { IConversation } from "../types/type.js";
-import AppError from "../utils/AppError.js";
 
 export const sendDirectMessage = catchAsync(
   async (req: Request, res: Response) => {

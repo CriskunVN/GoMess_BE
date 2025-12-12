@@ -16,7 +16,7 @@ const io = new Server(server, {
 
 io.use(socketAuthMiddleware);
 
-const onlineUsers = new Map(); // user: key , socket: value
+export const onlineUsers = new Map(); // user: key , socket: value
 
 io.on("connection", async (socket) => {
   const user = socket.data.user;
@@ -24,6 +24,9 @@ io.on("connection", async (socket) => {
   console.log(`${user.displayName} online với socket : ${socket.id}`);
 
   onlineUsers.set(user._id, socket.id);
+
+  // Join user vào room riêng của họ (dùng userId làm room name)
+  socket.join(user._id.toString());
 
   io.emit("online-users", Array.from(onlineUsers.keys()));
 
@@ -61,6 +64,13 @@ io.on("connection", async (socket) => {
         message: error.message || "Lỗi khi đánh dấu đã đọc",
       });
     }
+  });
+
+  // Socket event: User joins a new conversation room
+  socket.on("join-conversation", (data: { conversationId: string }) => {
+    const { conversationId } = data;
+    socket.join(conversationId);
+    console.log(`User ${user._id} joined room ${conversationId}`);
   });
 
   // Correct built-in event name is 'disconnect'

@@ -61,35 +61,6 @@ export const sendDirectMessageService = async (
     senderId,
     content
   );
-  // // Chuẩn bị data cho message
-  // let messageData: any = {
-  //   conversationId: conversation._id,
-  //   senderId,
-  //   content: content || "",
-  //   messageType: "text",
-  // };
-
-  // // Nếu có file, upload lên Cloudinary
-  // if (file) {
-  //   const uploadResult = await uploadFileToCloudinary(
-  //     file.buffer,
-  //     file.originalname,
-  //     file.mimetype
-  //   );
-
-  //   messageData.messageType = getMessageTypeFromMimeType(file.mimetype);
-  //   messageData.content = content || getMessageTypeFromMimeType(file.mimetype);
-  //   messageData.fileUrl = uploadResult.fileUrl;
-  //   messageData.thumbnailUrl = uploadResult.thumbnailUrl; // Thumbnail cho preview
-  //   messageData.optimizedUrl = uploadResult.optimizedUrl; // URL tối ưu
-  //   messageData.fileInfo = {
-  //     fileName: uploadResult.fileName,
-  //     fileSize: uploadResult.fileSize,
-  //     mimeType: uploadResult.mimeType,
-  //     width: uploadResult.width,
-  //     height: uploadResult.height,
-  //   };
-  // }
 
   // Tạo tin nhắn mới
   const message: IMessage = (await Message.create(messageData)) as IMessage;
@@ -123,35 +94,6 @@ export const sendGroupMessageService = async (
     senderId,
     content
   );
-  // // Chuẩn bị data cho message
-  // let messageData: any = {
-  //   conversationId: conversationId,
-  //   senderId,
-  //   content: content || "",
-  //   messageType: "text",
-  // };
-
-  // // Nếu có file, upload lên Cloudinary
-  // if (file) {
-  //   const uploadResult = await uploadFileToCloudinary(
-  //     file.buffer,
-  //     file.originalname,
-  //     file.mimetype
-  //   );
-
-  //   messageData.messageType = getMessageTypeFromMimeType(file.mimetype);
-  //   messageData.content = content || getMessageTypeFromMimeType(file.mimetype);
-  //   messageData.fileUrl = uploadResult.fileUrl;
-  //   messageData.thumbnailUrl = uploadResult.thumbnailUrl; // Thumbnail cho preview
-  //   messageData.optimizedUrl = uploadResult.optimizedUrl; // URL tối ưu
-  //   messageData.fileInfo = {
-  //     fileName: uploadResult.fileName,
-  //     fileSize: uploadResult.fileSize,
-  //     mimeType: uploadResult.mimeType,
-  //     width: uploadResult.width,
-  //     height: uploadResult.height,
-  //   };
-  // }
 
   // Tạo tin nhắn mới
   const message: IMessage = (await Message.create(messageData)) as IMessage;

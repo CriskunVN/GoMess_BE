@@ -39,33 +39,6 @@ export const sendDirectMessageService = async (senderId, recipientId, content, c
         }
     }
     const messageData = await messageDataToUpload(file, String(conversation._id), senderId, content);
-    // // Chuẩn bị data cho message
-    // let messageData: any = {
-    //   conversationId: conversation._id,
-    //   senderId,
-    //   content: content || "",
-    //   messageType: "text",
-    // };
-    // // Nếu có file, upload lên Cloudinary
-    // if (file) {
-    //   const uploadResult = await uploadFileToCloudinary(
-    //     file.buffer,
-    //     file.originalname,
-    //     file.mimetype
-    //   );
-    //   messageData.messageType = getMessageTypeFromMimeType(file.mimetype);
-    //   messageData.content = content || getMessageTypeFromMimeType(file.mimetype);
-    //   messageData.fileUrl = uploadResult.fileUrl;
-    //   messageData.thumbnailUrl = uploadResult.thumbnailUrl; // Thumbnail cho preview
-    //   messageData.optimizedUrl = uploadResult.optimizedUrl; // URL tối ưu
-    //   messageData.fileInfo = {
-    //     fileName: uploadResult.fileName,
-    //     fileSize: uploadResult.fileSize,
-    //     mimeType: uploadResult.mimeType,
-    //     width: uploadResult.width,
-    //     height: uploadResult.height,
-    //   };
-    // }
     // Tạo tin nhắn mới
     const message = (await Message.create(messageData));
     updateConversationAfterCreateMessage(conversation, message, senderId);
@@ -83,33 +56,6 @@ export const sendGroupMessageService = async (conversationId, content, senderId,
         throw new AppError("Tin nhắn phải có nội dung hoặc file", 400);
     }
     const messageData = await messageDataToUpload(file, conversationId, senderId, content);
-    // // Chuẩn bị data cho message
-    // let messageData: any = {
-    //   conversationId: conversationId,
-    //   senderId,
-    //   content: content || "",
-    //   messageType: "text",
-    // };
-    // // Nếu có file, upload lên Cloudinary
-    // if (file) {
-    //   const uploadResult = await uploadFileToCloudinary(
-    //     file.buffer,
-    //     file.originalname,
-    //     file.mimetype
-    //   );
-    //   messageData.messageType = getMessageTypeFromMimeType(file.mimetype);
-    //   messageData.content = content || getMessageTypeFromMimeType(file.mimetype);
-    //   messageData.fileUrl = uploadResult.fileUrl;
-    //   messageData.thumbnailUrl = uploadResult.thumbnailUrl; // Thumbnail cho preview
-    //   messageData.optimizedUrl = uploadResult.optimizedUrl; // URL tối ưu
-    //   messageData.fileInfo = {
-    //     fileName: uploadResult.fileName,
-    //     fileSize: uploadResult.fileSize,
-    //     mimeType: uploadResult.mimeType,
-    //     width: uploadResult.width,
-    //     height: uploadResult.height,
-    //   };
-    // }
     // Tạo tin nhắn mới
     const message = (await Message.create(messageData));
     updateConversationAfterCreateMessage(conversation, message, senderId.toString());

@@ -1,6 +1,5 @@
 import { sendDirectMessageService, sendGroupMessageService, } from "../services/message.service.js";
 import catchAsync from "../utils/catchAsync.js";
-import AppError from "../utils/AppError.js";
 export const sendDirectMessage = catchAsync(async (req, res) => {
     const { recipientId, content, conversationId } = req.body;
     const senderId = req.user?.id;

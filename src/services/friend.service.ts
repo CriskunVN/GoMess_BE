@@ -2,6 +2,8 @@ import FriendRequest from "../models/friendRequest.model.js";
 import User from "../models/user.model.js";
 import Friend from "../models/friend.model.js";
 import AppError from "../utils/AppError.js";
+import Conversation from "../models/conversation.model.js";
+import { getIO, onlineUsers } from "../sockets/index.js";
 
 // service gửi lời mời kết bạn
 export const sendFriendRequestService = async (
@@ -54,6 +56,21 @@ export const sendFriendRequestService = async (
     message,
   });
 
+  // populate thông tin người gửi lời mời kết bạn
+  await request.populate("from", "_id displayName avatarUrl");
+
+  // emit sự kiện cho người nhận lời mời kết bạn
+  const io = getIO();
+  const requestData = {
+    _id: request._id,
+    from: request.from,
+    message: request.message,
+    createdAt: request.createdAt,
+  };
+  
+  io.to(toUserId.toString()).emit("new-friend-request", requestData);
+  console.log(`[new-friend-request] Emitted to user: ${toUserId}`);
+
   return request;
 };
 
@@ -77,6 +94,50 @@ export const acceptFriendRequestService = async (
     userA: friendRequest.from,
     userB: friendRequest.to,
   });
+
+  // tạo cuộc trò chuyện trực tiếp giữa hai người dùng
+  const newConvo = await Conversation.create({
+    type: "direct",
+    participants: [
+      { userId: friendRequest.from, joinedAt: new Date() },
+      { userId: friendRequest.to, joinedAt: new Date() },
+    ],
+    lastMessageAt: new Date(),
+  });
+
+  // Populate participant info trước khi emit để frontend có đủ dữ liệu hiển thị
+  await newConvo.populate([
+    {
+      path: "participants.userId",
+      select: "displayName avatarUrl",
+    },
+  ]);
+
+  // báo cho client về cuộc trò chuyện mới
+  // Emit event đến hai người dùng trong cuộc trò chuyện (sử dụng userId làm room name)
+  const io = getIO();
+
+  // Format data giống như getConversationsService để frontend xử lý đúng
+  const convoObject = newConvo.toObject();
+  const participants = (convoObject.participants || []).map((p: any) => ({
+    _id: p.userId?._id,
+    displayName: p.userId?.displayName,
+    avatarUrl: p.userId?.avatarUrl ?? null,
+    joinedAt: p.joinedAt,
+  }));
+
+  const convoData = {
+    ...convoObject,
+    participants,
+    unreadCounts: {},
+  };
+  
+  io.to(friendRequest.from.toString()).emit("new-conversation", convoData);
+  io.to(friendRequest.to.toString()).emit("new-conversation", convoData);
+
+  console.log(
+    `Emitted new-conversation to users: ${friendRequest.from}, ${friendRequest.to}`
+  );
 
   // Xóa lời mời kết bạn
   await FriendRequest.findByIdAndDelete(requestId);
