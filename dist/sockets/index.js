@@ -47,12 +47,6 @@ io.on("connection", async (socket) => {
             });
         }
     });
-    // Socket event: User joins a new conversation room
-    socket.on("join-conversation", (data) => {
-        const { conversationId } = data;
-        socket.join(conversationId);
-        console.log(`User ${user._id} joined room ${conversationId}`);
-    });
     // Correct built-in event name is 'disconnect'
     socket.on("disconnect", (reason) => {
         onlineUsers.delete(user._id);
