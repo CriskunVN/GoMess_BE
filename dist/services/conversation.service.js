@@ -1,6 +1,8 @@
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
+import { getIO } from "../sockets/index.js";
 import AppError from "../utils/AppError.js";
+import { io } from "../sockets/index.js";
 export const createConversationService = async (userId, name, type, memberIds) => {
     if (!type ||
         (type === "group" && !name) ||
@@ -41,6 +43,14 @@ export const createConversationService = async (userId, name, type, memberIds) =
             lastMessageAt: new Date(),
         });
         await conversation.save();
+        // Emit tới người tạo group
+        console.log(`[DEBUG] Creator room: "${userId.toString()}"`);
+        io.to(userId.toString()).emit("new-group", conversation);
+        // Emit tới tất cả thành viên được thêm vào
+        memberIds.forEach((memberId) => {
+            console.log(`[DEBUG] Member room: "${memberId.toString()}" | type: ${typeof memberId}`);
+            io.to(memberId.toString()).emit("new-group", conversation);
+        });
     }
     if (!conversation) {
         throw new Error("Conversation type không hợp lệ");

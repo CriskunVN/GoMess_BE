@@ -42,8 +42,8 @@ export const Login = catchAsync(async (req, res, next) => {
     // Cập nhật refresh token trong cookie
     res.cookie("refreshToken", refreshToken, {
         httpOnly: true, // chống XSS
-        secure: true,
-        sameSite: "none", // Chỉ gửi cookie trong cùng một trang web
+        secure: process.env.NODE_ENV === "production", // chỉ true khi production (HTTPS)
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax", // lax cho development
         maxAge: REFRESH_TOKEN_EXPIRES_DAYS, // 30 days
     });
     res.status(200).json({ status: "success", accessToken, data: { user } });
