@@ -4,6 +4,8 @@ import express from "express";
 import app from "../app.js";
 import { socketAuthMiddleware } from "../middlewares/socket.middleware.js";
 import { getUserConversationsForSocketIO } from "../controllers/conversation.controller.js";
+// Kiểm tra user có quyền join conversation này không
+import { checkUserInConversation } from "../controllers/conversation.controller.js";
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
@@ -23,6 +25,37 @@ io.on("connection", async (socket) => {
     const conversationIds = await getUserConversationsForSocketIO(user._id);
     conversationIds.forEach((conversationId) => {
         socket.join(conversationId);
+    });
+    // Socket event: User join vào conversation
+    socket.on("join-conversation", async (data) => {
+        try {
+            const { conversationId } = data;
+            const userId = user._id.toString();
+            console.log(`User ${user.displayName} joining conversation ${conversationId}`);
+            const isUserInConversation = await checkUserInConversation(conversationId, userId);
+            if (!isUserInConversation) {
+                socket.emit("error", {
+                    message: "Bạn không có quyền truy cập conversation này",
+                });
+                return;
+            }
+            // Join socket vào room conversation
+            socket.join(conversationId);
+            console.log(`Socket ${socket.id} joined room ${conversationId}`);
+            // Emit event thông báo user đã join
+            io.to(conversationId).emit("user-joined-conversation", {
+                conversationId,
+                userId,
+                userName: user.displayName,
+                timestamp: new Date(),
+            });
+        }
+        catch (error) {
+            console.error("Error in join-conversation:", error);
+            socket.emit("error", {
+                message: error.message || "Lỗi khi join conversation",
+            });
+        }
     });
     // Socket event: User đánh dấu đã đọc tin nhắn
     socket.on("mark-as-read", async (data) => {

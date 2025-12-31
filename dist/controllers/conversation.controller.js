@@ -35,6 +35,19 @@ export const getUserConversationsForSocketIO = async (userId) => {
         return [];
     }
 };
+export const checkUserInConversation = async (conversationId, userId) => {
+    try {
+        const conversation = await Conversation.findOne({
+            _id: conversationId,
+            "participants.userId": userId,
+        });
+        return !!conversation;
+    }
+    catch (error) {
+        console.error("Lỗi kiểm tra user trong conversation:", error);
+        return false;
+    }
+};
 export const markAsRead = catchAsync(async (req, res) => {
     const { conversationId } = req.params;
     const userId = req.user?._id?.toString();
